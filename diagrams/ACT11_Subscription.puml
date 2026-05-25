@@ -1,0 +1,58 @@
+@startuml
+title Biểu đồ hoạt động: Đăng ký Subscription
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Store Admin|
+start
+:Chọn "Nâng cấp gói";
+
+|Hệ thống|
+:Tải danh sách SubscriptionPlan;
+:Hiển thị các gói
+(BASIC, PRO, ENTERPRISE);
+
+|Store Admin|
+:Chọn gói và nhấn "Đăng ký";
+
+|Hệ thống|
+:POST /api/subscriptions/subscribe;
+:Tạo Subscription (status = PENDING);
+:Tạo PaymentLink qua Razorpay API;
+:Trả về paymentLinkUrl;
+
+|Store Admin|
+:Redirect đến trang thanh toán;
+
+|Razorpay|
+:Hiển thị form thanh toán;
+
+|Store Admin|
+:Nhập thông tin thanh toán;
+
+|Razorpay|
+:Xử lý giao dịch;
+:Callback về hệ thống
+với payment_link_id và status;
+
+|Hệ thống|
+:Verify payment
+GET /api/payments/verify;
+
+if (Thanh toán thành công?) then (Có)
+  :Cập nhật Subscription:
+  status = ACTIVE
+  startDate = now()
+  endDate = now() + billingCycle;
+  :Lưu Payment record vào Database;
+  |Store Admin|
+  :Thông báo đăng ký thành công;
+else (Không)
+  :Cập nhật Subscription:
+  status = CANCELLED;
+  |Store Admin|
+  :Thông báo thanh toán thất bại;
+endif
+stop
+@enduml

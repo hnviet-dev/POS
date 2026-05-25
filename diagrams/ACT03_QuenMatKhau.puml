@@ -1,0 +1,57 @@
+@startuml
+title Biểu đồ hoạt động: Quên / Đặt lại mật khẩu
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Người dùng|
+start
+:Chọn "Quên mật khẩu";
+:Nhập email vào form;
+
+|Hệ thống|
+:POST /auth/forgot-password;
+:Tìm User theo email trong Database;
+
+if (Email tồn tại?) then (Không)
+  :Trả lỗi: "User not found";
+  |Người dùng|
+  :Hiển thị thông báo lỗi;
+  stop
+else (Có)
+endif
+
+:Tạo UUID token (hết hạn 5 phút);
+:Lưu token vào bảng password_reset_tokens;
+
+|Email Server|
+:Gửi email chứa link reset
+qua Gmail SMTP;
+
+|Người dùng|
+:Nhận email, click link reset;
+:Mở form nhập password mới;
+:Nhập password mới và xác nhận;
+
+|Hệ thống|
+:POST /auth/reset-password
+{token, newPassword};
+:Tìm token trong Database;
+
+if (Token còn hiệu lực?) then (Hết hạn)
+  :Xóa token khỏi DB;
+  :Trả lỗi: "Token expired";
+  |Người dùng|
+  :Hiển thị lỗi, yêu cầu gửi lại;
+  stop
+else (Còn)
+endif
+
+:BCrypt encode password mới;
+:Cập nhật password trong bảng users;
+:Xóa token đã dùng khỏi DB;
+
+|Người dùng|
+:Thông báo đổi mật khẩu thành công;
+stop
+@enduml

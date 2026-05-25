@@ -1,0 +1,48 @@
+@startuml
+title Biểu đồ hoạt động: Đăng nhập
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Người dùng|
+start
+:Chọn Đăng nhập;
+:Nhập email và password;
+
+|Hệ thống|
+:Gửi POST /auth/login
+đến AuthController;
+:loadUserByUsername(email)
+Tìm User trong Database;
+
+if (User tồn tại?) then (Không)
+  :Trả lỗi: "User not found";
+  |Người dùng|
+  :Hiển thị thông báo lỗi;
+  stop
+else (Có)
+endif
+
+:passwordEncoder.matches()
+So sánh password với hash;
+
+if (Password đúng?) then (Sai)
+  :Trả lỗi: "Invalid password";
+  |Người dùng|
+  :Hiển thị thông báo lỗi;
+  stop
+else (Đúng)
+endif
+
+:Tạo JWT Token;
+:Cập nhật lastLogin vào bảng users;
+:Trả về { jwt, user };
+
+|Người dùng|
+if (Xác định Role?) then (ADMIN)
+  :Điều hướng /super-admin;
+else (STORE_ADMIN)
+  :Điều hướng /store;
+endif
+stop
+@enduml

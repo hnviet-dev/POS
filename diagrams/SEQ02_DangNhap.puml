@@ -1,0 +1,67 @@
+@startuml
+title Biểu đồ tuần tự: Đăng nhập
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Người dùng" as user
+boundary "Form_DangNhap" as bd
+control "Control_DangNhap" as ctrl
+entity "Entity_User" as ent
+database "CSDL" as db
+
+user -> bd : Chọn Đăng nhập
+activate bd
+bd --> user : Hiển thị form đăng nhập
+user -> bd : Nhập email và password
+bd -> ctrl : Gửi thông tin đăng nhập
+activate ctrl
+
+ctrl -> ent : loadUserByUsername(email)
+activate ent
+ent -> db : SELECT * FROM users WHERE email=?
+activate db
+db --> ent : Kết quả truy vấn
+deactivate db
+ent --> ctrl : Trả kết quả
+deactivate ent
+
+alt User không tồn tại
+    ctrl --> bd : Lỗi: "User not found"
+    bd --> user : Hiển thị thông báo lỗi
+else User tồn tại
+    ctrl -> ctrl : passwordEncoder.matches()\nSo sánh password
+    alt Password sai
+        ctrl --> bd : Lỗi: "Invalid password"
+        bd --> user : Hiển thị thông báo lỗi
+    else Password đúng
+        ctrl -> ctrl : Tạo JWT Token
+        ctrl -> ent : Cập nhật lastLogin
+        activate ent
+        ent -> db : UPDATE users SET lastLogin=?
+        activate db
+        db --> ent : OK
+        deactivate db
+        ent --> ctrl : OK
+        deactivate ent
+        ctrl --> bd : Trả về { jwt, user }
+        deactivate ctrl
+        bd -> bd : Kiểm tra role
+        alt ROLE_ADMIN
+            bd --> user : Điều hướng /super-admin
+        else ROLE_STORE_ADMIN
+            bd --> user : Điều hướng /store
+        else ROLE_BRANCH_MANAGER
+            bd --> user : Điều hướng /branch
+        else ROLE_BRANCH_CASHIER
+            bd --> user : Điều hướng /cashier
+        end
+    end
+end
+deactivate bd
+@enduml

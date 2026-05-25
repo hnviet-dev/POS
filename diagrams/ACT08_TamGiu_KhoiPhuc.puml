@@ -1,0 +1,41 @@
+@startuml
+title Biểu đồ hoạt động: Tạm giữ và Khôi phục đơn hàng
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Cashier|
+start
+:Đang phục vụ khách A
+Thêm sản phẩm vào giỏ hàng;
+:Nhấn nút "Tạm giữ" (Hold Order);
+
+|Hệ thống (Redux)|
+:holdCurrentCart():
+Lưu giỏ hiện tại vào holdOrders[];
+:Tạo giỏ hàng mới (rỗng);
+:Hiển thị badge số đơn tạm giữ;
+
+|Cashier|
+:Phục vụ khách hàng B
+(thêm SP, thanh toán bình thường);
+:Nhấn "Đơn tạm giữ" (Held Orders);
+
+|Hệ thống (Redux)|
+:getHoldOrders():
+Hiển thị danh sách đơn tạm giữ;
+
+|Cashier|
+:Chọn đơn cần khôi phục;
+
+|Hệ thống (Redux)|
+:resumeHoldOrder(index):
+Lấy đơn từ holdOrders[index]
+Xóa khỏi danh sách
+Set làm giỏ hàng hiện tại;
+
+|Cashier|
+:Giỏ hàng khách A được khôi phục;
+:Tiếp tục thanh toán cho khách A;
+stop
+@enduml

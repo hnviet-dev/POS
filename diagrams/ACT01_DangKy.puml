@@ -1,0 +1,46 @@
+@startuml
+title Biểu đồ hoạt động: Đăng ký tài khoản
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Người dùng mới|
+start
+:Chọn Đăng ký;
+:Nhập thông tin đăng ký
+(fullName, email, password, phone);
+
+|Hệ thống|
+:Gửi POST /auth/signup
+đến AuthController;
+:Kiểm tra email trong Database;
+
+if (Email đã tồn tại?) then (Có)
+  :Trả lỗi: "Email already exists";
+  |Người dùng mới|
+  :Hiển thị thông báo lỗi;
+  stop
+else (Không)
+endif
+
+if (Role = ROLE_ADMIN?) then (Có)
+  :Trả lỗi: "Cannot register as Admin";
+  |Người dùng mới|
+  :Hiển thị thông báo lỗi;
+  stop
+else (Không)
+endif
+
+:Mã hóa password
+bằng BCryptPasswordEncoder;
+:Tạo đối tượng User mới
+và lưu vào Database;
+:Tạo JWT Token
+(JwtProvider.generateToken);
+:Trả về { jwt, user };
+
+|Người dùng mới|
+:Lưu JWT vào localStorage;
+:Điều hướng vào hệ thống theo role;
+stop
+@enduml

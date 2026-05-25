@@ -1,0 +1,55 @@
+@startuml
+title Biểu đồ tuần tự: Tạo chi nhánh
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Store Admin" as user
+boundary "Form_TaoChiNhanh" as bd
+control "Control_Branch" as ctrl
+entity "Entity_Branch" as ent
+entity "Entity_Store" as store
+database "CSDL" as db
+
+user -> bd : Chọn "Tạo chi nhánh"
+activate bd
+bd --> user : Hiển thị form tạo chi nhánh
+user -> bd : Nhập thông tin\n(name, address, phone, email,\nopenTime, closeTime, workingDays)
+bd -> ctrl : POST /api/branches
+activate ctrl
+
+ctrl -> ctrl : Lấy currentUser từ JWT
+ctrl -> store : getStoreByUser(currentUser)
+activate store
+store -> db : SELECT * FROM stores\nWHERE store_admin_id=?
+activate db
+db --> store : Store
+deactivate db
+store --> ctrl : Store
+deactivate store
+
+ctrl -> ctrl : checkAuthority()\nKiểm tra quyền Store Admin
+
+alt Không có quyền
+    ctrl --> bd : Lỗi: "Unauthorized"
+    bd --> user : Hiển thị lỗi
+else Có quyền
+    ctrl -> ent : Tạo Branch mới\n(store = currentStore)
+    activate ent
+    ent -> db : INSERT INTO branches(...)
+    activate db
+    db --> ent : Branch ID
+    deactivate db
+    ent --> ctrl : Branch đã tạo
+    deactivate ent
+    ctrl --> bd : Trả về Branch
+    deactivate ctrl
+    bd --> user : Thông báo tạo chi nhánh thành công
+end
+deactivate bd
+@enduml

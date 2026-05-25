@@ -1,0 +1,41 @@
+@startuml
+title Biểu đồ hoạt động: Thêm nhân viên
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Store Admin|
+start
+:Chọn "Thêm nhân viên";
+
+|Hệ thống|
+:Hiển thị form thêm nhân viên;
+
+|Store Admin|
+:Nhập thông tin nhân viên
+(fullName, email, password,
+phone, role, branchId);
+
+|Hệ thống|
+:POST /api/users/add-employee;
+:Lấy currentUser từ JWT;
+:checkAuthority() - Kiểm tra quyền;
+:Kiểm tra email trùng trong Database;
+
+if (Email đã tồn tại?) then (Có)
+  :Trả lỗi: "Email already exists";
+  |Store Admin|
+  :Hiển thị thông báo lỗi;
+  stop
+else (Không)
+endif
+
+:Tìm Branch theo branchId;
+:BCrypt encode password;
+:Tạo User mới (role, store, branch);
+:Lưu User vào Database;
+
+|Store Admin|
+:Thông báo thêm nhân viên thành công;
+stop
+@enduml

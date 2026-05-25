@@ -1,0 +1,70 @@
+@startuml
+title Biểu đồ tuần tự: Bán hàng POS
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Cashier" as user
+boundary "ManHinh_POS" as bd
+control "Control_POS" as ctrl
+entity "Entity_Order" as ord
+entity "Entity_Product" as prod
+database "CSDL" as db
+
+user -> bd : Mở màn hình POS
+activate bd
+bd -> ctrl : GET /api/products?branch=...
+activate ctrl
+ctrl -> prod : Lấy danh sách sản phẩm
+activate prod
+prod -> db : SELECT * FROM products
+activate db
+db --> prod : Danh sách SP
+deactivate db
+prod --> ctrl : List<Product>
+deactivate prod
+ctrl --> bd : Trả danh sách SP
+deactivate ctrl
+bd --> user : Hiển thị danh sách sản phẩm
+
+loop Thêm sản phẩm vào giỏ
+    user -> bd : Chọn sản phẩm + số lượng
+    bd -> bd : Redux: cartSlice.addItem()\nTính toán realtime\n(subtotal, tax, total)
+    bd --> user : Cập nhật giỏ hàng
+end
+
+user -> bd : Chọn khách hàng (tùy chọn)
+user -> bd : Chọn phương thức thanh toán\n(CASH / CARD / UPI)
+user -> bd : Nhấn "Thanh toán"
+
+bd -> ctrl : POST /api/orders
+activate ctrl
+ctrl -> ctrl : Lấy cashier từ JWT\nLấy branch từ cashier
+ctrl -> ord : Tạo Order mới
+activate ord
+ord -> ord : Set status = COMPLETED\nSet paymentType\nSet totalAmount
+ord -> db : INSERT INTO orders(...)
+activate db
+db --> ord : Order ID
+deactivate db
+
+loop Lưu từng OrderItem
+    ord -> db : INSERT INTO order_items(...)
+    activate db
+    db --> ord : OK
+    deactivate db
+end
+
+ord --> ctrl : Order đã tạo
+deactivate ord
+ctrl --> bd : Trả về Order
+deactivate ctrl
+bd -> bd : Redux: clearCart()
+bd --> user : Hiển thị hóa đơn thành công
+deactivate bd
+@enduml

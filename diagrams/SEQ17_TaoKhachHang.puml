@@ -1,0 +1,62 @@
+@startuml
+title Biểu đồ tuần tự: Tạo khách hàng
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Cashier" as user
+boundary "Form_KhachHang" as bd
+control "Control_Customer" as ctrl
+entity "Entity_Customer" as ent
+entity "Entity_Branch" as branch
+database "CSDL" as db
+
+user -> bd : Chọn "Tạo khách hàng"\n(từ màn hình POS)
+activate bd
+bd --> user : Hiển thị form khách hàng
+user -> bd : Nhập thông tin\n(fullName, email, phone)
+bd -> ctrl : POST /api/customers
+activate ctrl
+
+ctrl -> ctrl : Lấy currentUser từ JWT
+ctrl -> branch : Lấy branch từ user
+activate branch
+branch -> db : SELECT * FROM branches WHERE id=?
+activate db
+db --> branch : Branch
+deactivate db
+branch --> ctrl : Branch
+deactivate branch
+
+ctrl -> ent : Kiểm tra phone trùng
+activate ent
+ent -> db : SELECT * FROM customers\nWHERE phone=? AND branch_id=?
+activate db
+db --> ent : Kết quả
+deactivate db
+ent --> ctrl : Kết quả
+deactivate ent
+
+alt Phone đã tồn tại trong branch
+    ctrl --> bd : Lỗi: "Customer already exists"
+    bd --> user : Hiển thị lỗi
+else Phone chưa tồn tại
+    ctrl -> ent : Tạo Customer mới\n(fullName, email, phone, branch)
+    activate ent
+    ent -> db : INSERT INTO customers(...)
+    activate db
+    db --> ent : Customer ID
+    deactivate db
+    ent --> ctrl : Customer đã tạo
+    deactivate ent
+    ctrl --> bd : Trả về Customer
+    deactivate ctrl
+    bd --> user : Thông báo tạo khách hàng thành công\nTự động gắn vào đơn hàng hiện tại
+end
+deactivate bd
+@enduml

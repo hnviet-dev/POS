@@ -1,0 +1,40 @@
+@startuml
+title Biểu đồ tuần tự: Tạo cửa hàng
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Store Admin" as user
+boundary "Form_TaoCuaHang" as bd
+control "Control_Store" as ctrl
+entity "Entity_Store" as ent
+database "CSDL" as db
+
+user -> bd : Chọn "Tạo cửa hàng"
+activate bd
+bd --> user : Hiển thị form tạo cửa hàng
+user -> bd : Nhập thông tin\n(brand, description, storeType, contact)
+bd -> ctrl : POST /api/stores
+activate ctrl
+
+ctrl -> ctrl : Lấy currentUser từ JWT
+ctrl -> ent : Tạo Store mới\n(storeAdmin = currentUser)
+activate ent
+ent -> ent : Set status = PENDING\nSet createdAt = now()
+ent -> db : INSERT INTO stores(...)
+activate db
+db --> ent : Lưu thành công
+deactivate db
+ent --> ctrl : Store (PENDING)
+deactivate ent
+
+ctrl --> bd : Trả về Store
+deactivate ctrl
+bd --> user : Hiển thị thông báo:\n"Cửa hàng đang chờ duyệt"
+deactivate bd
+@enduml

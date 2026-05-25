@@ -1,0 +1,106 @@
+@startuml
+title Biểu đồ tuần tự: Quên / Đặt lại mật khẩu
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Người dùng" as user
+boundary "Form_QuenMK" as bd
+control "Control_ResetPW" as ctrl
+entity "Entity_Token" as tok
+entity "Entity_User" as ent
+database "CSDL" as db
+
+== Giai đoạn 1: Yêu cầu reset ==
+user -> bd : Chọn "Quên mật khẩu"
+activate bd
+bd --> user : Hiển thị form nhập email
+user -> bd : Nhập email
+bd -> ctrl : POST /auth/forgot-password
+activate ctrl
+
+ctrl -> ent : findByEmail(email)
+activate ent
+ent -> db : SELECT * FROM users WHERE email=?
+activate db
+db --> ent : Kết quả
+deactivate db
+ent --> ctrl : User
+deactivate ent
+
+alt User không tồn tại
+    ctrl --> bd : Lỗi: "User not found"
+    bd --> user : Hiển thị lỗi
+else User tồn tại
+    ctrl -> ctrl : Tạo UUID token\n(hết hạn 5 phút)
+    ctrl -> tok : Lưu PasswordResetToken
+    activate tok
+    tok -> db : INSERT INTO password_reset_tokens
+    activate db
+    db --> tok : OK
+    deactivate db
+    tok --> ctrl : OK
+    deactivate tok
+    ctrl -> ctrl : Gửi email qua Gmail SMTP\nchứa link reset
+    ctrl --> bd : Thông báo: Đã gửi email
+    deactivate ctrl
+    bd --> user : Hiển thị "Kiểm tra email"
+end
+
+== Giai đoạn 2: Đặt lại mật khẩu ==
+user -> bd : Click link trong email
+activate bd
+bd --> user : Hiển thị form nhập password mới
+user -> bd : Nhập password mới
+bd -> ctrl : POST /auth/reset-password\n{token, newPassword}
+activate ctrl
+
+ctrl -> tok : Tìm token trong DB
+activate tok
+tok -> db : SELECT * FROM password_reset_tokens WHERE token=?
+activate db
+db --> tok : Kết quả
+deactivate db
+tok --> ctrl : Token
+deactivate tok
+
+alt Token hết hạn hoặc không tồn tại
+    ctrl -> tok : Xóa token
+    activate tok
+    tok -> db : DELETE FROM password_reset_tokens
+    activate db
+    db --> tok : OK
+    deactivate db
+    tok --> ctrl : OK
+    deactivate tok
+    ctrl --> bd : Lỗi: "Token expired"
+    bd --> user : Hiển thị lỗi
+else Token hợp lệ
+    ctrl -> ctrl : BCrypt encode password mới
+    ctrl -> ent : Cập nhật password
+    activate ent
+    ent -> db : UPDATE users SET password=?
+    activate db
+    db --> ent : OK
+    deactivate db
+    ent --> ctrl : OK
+    deactivate ent
+    ctrl -> tok : Xóa token đã dùng
+    activate tok
+    tok -> db : DELETE FROM password_reset_tokens
+    activate db
+    db --> tok : OK
+    deactivate db
+    tok --> ctrl : OK
+    deactivate tok
+    ctrl --> bd : Thành công
+    deactivate ctrl
+    bd --> user : Thông báo đổi mật khẩu thành công
+end
+deactivate bd
+@enduml

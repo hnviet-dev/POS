@@ -1,0 +1,55 @@
+@startuml
+title Biểu đồ tuần tự: Xem báo cáo Analytics
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Store Admin /\nBranch Manager" as user
+boundary "ManHinh_BaoCao" as bd
+control "Control_Analytics" as ctrl
+entity "Entity_Order" as ord
+entity "Entity_Refund" as ref
+database "CSDL" as db
+
+user -> bd : Chọn "Báo cáo"
+activate bd
+bd --> user : Hiển thị trang báo cáo\n(chọn loại, khoảng thời gian)
+
+user -> bd : Chọn loại báo cáo\n(Doanh thu / Sản phẩm / Thanh toán)
+user -> bd : Chọn khoảng thời gian\n(Hôm nay / Tuần / Tháng / Năm)
+bd -> ctrl : GET /api/analytics/...\n?period=...&branch=...
+activate ctrl
+
+ctrl -> ctrl : Xác định timeRange\ntừ period parameter
+
+ctrl -> ord : Lấy orders trong khoảng thời gian
+activate ord
+ord -> db : SELECT * FROM orders\nWHERE createdAt BETWEEN ? AND ?\nAND branch_id=?
+activate db
+db --> ord : List<Order>
+deactivate db
+ord --> ctrl : Danh sách đơn hàng
+deactivate ord
+
+ctrl -> ref : Lấy refunds trong khoảng thời gian
+activate ref
+ref -> db : SELECT * FROM refunds\nWHERE createdAt BETWEEN ? AND ?
+activate db
+db --> ref : List<Refund>
+deactivate db
+ref --> ctrl : Danh sách hoàn trả
+deactivate ref
+
+ctrl -> ctrl : Tính toán aggregate:\n- Tổng doanh thu\n- Tổng hoàn trả\n- Doanh thu thuần\n- Nhóm theo ngày/tuần/tháng\n- Top sản phẩm bán chạy\n- Phân bổ thanh toán (CASH/CARD/UPI)
+
+ctrl --> bd : Trả về dữ liệu báo cáo (JSON)
+deactivate ctrl
+bd -> bd : Vẽ biểu đồ bằng Recharts\n(BarChart, LineChart, PieChart)
+bd --> user : Hiển thị báo cáo trực quan
+deactivate bd
+@enduml

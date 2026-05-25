@@ -1,0 +1,42 @@
+@startuml
+title Biểu đồ hoạt động: Hoàn trả đơn hàng
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Cashier|
+start
+:Chọn "Hoàn trả đơn hàng";
+
+|Hệ thống|
+:Tải danh sách đơn hàng của chi nhánh;
+:Hiển thị đơn hàng có status = COMPLETED;
+
+|Cashier|
+:Chọn đơn hàng cần hoàn trả;
+:Nhập lý do hoàn trả;
+
+|Hệ thống|
+:POST /api/refunds;
+:Tìm Order theo orderId;
+
+if (Order hợp lệ?) then (Không)
+  :Trả lỗi: "Order không tồn tại
+  hoặc đã hoàn trả";
+  |Cashier|
+  :Hiển thị thông báo lỗi;
+  stop
+else (Có)
+endif
+
+:Tạo Refund mới
+(order, reason, amount,
+paymentType, cashier, branch);
+:Lưu Refund vào Database;
+:Cập nhật Order: status = REFUNDED;
+:Lưu cập nhật vào Database;
+
+|Cashier|
+:Thông báo hoàn trả thành công;
+stop
+@enduml

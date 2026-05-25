@@ -1,0 +1,348 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam roundcorner 0
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+  FontColor Black
+  AttributeFontColor Black
+  StereotypeFontColor Black
+  BorderThickness 1
+}
+skinparam enum {
+  BackgroundColor White
+  BorderColor Black
+  FontColor Black
+  AttributeFontColor Black
+  StereotypeFontColor Black
+  BorderThickness 1
+}
+skinparam note {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 11
+
+' ==================== ENUMS ====================
+enum UserRole {
+  ROLE_ADMIN
+  ROLE_STORE_ADMIN
+  ROLE_STORE_MANAGER
+  ROLE_BRANCH_MANAGER
+  ROLE_BRANCH_ADMIN
+  ROLE_BRANCH_CASHIER
+  ROLE_CUSTOMER
+}
+
+enum StoreStatus {
+  ACTIVE
+  PENDING
+  BLOCKED
+}
+
+enum OrderStatus {
+  COMPLETED
+  PENDING
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentType {
+  CARD
+  UPI
+  CASH
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum PaymentGateway {
+  RAZORPAY
+  STRIPE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PaymentOrderStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+' ==================== CLASSES ====================
+class User {
+  - id : Long
+  - fullName : String
+  - password : String
+  - email : String
+  - phone : String
+  - role : UserRole
+  - verified : Boolean
+  - lastLogin : LocalDateTime
+  - createdAt : LocalDateTime
+  - updatedAt : LocalDateTime
+}
+
+class Store {
+  - id : Long
+  - brand : String
+  - description : String
+  - storeType : String
+  - status : StoreStatus
+  - createdAt : LocalDateTime
+  - updatedAt : LocalDateTime
+  __
+  # onCreate()
+  # onUpdate()
+}
+
+class StoreContact <<Embeddable>> {
+  - address : String
+  - phone : String
+  - email : String
+}
+
+class Branch {
+  - id : Long
+  - name : String
+  - address : String
+  - phone : String
+  - email : String
+  - openTime : LocalTime
+  - closeTime : LocalTime
+  - workingDays : List<String>
+  - createdAt : LocalDateTime
+  - updatedAt : LocalDateTime
+  __
+  # onCreate()
+  # onUpdate()
+}
+
+class Product {
+  - id : Long
+  - name : String
+  - sku : String
+  - description : String
+  - mrp : Double
+  - sellingPrice : Double
+  - brand : String
+  - image : String
+  - createdAt : LocalDateTime
+  - updatedAt : LocalDateTime
+  __
+  # onCreate()
+  # onUpdate()
+}
+
+class Category {
+  - id : Long
+  - name : String
+}
+
+class Inventory {
+  - id : Long
+  - quantity : Integer
+  - lastUpdated : LocalDateTime
+  __
+  # onUpdate()
+}
+
+class Order {
+  - id : Long
+  - totalAmount : Double
+  - paymentType : PaymentType
+  - status : OrderStatus
+  - createdAt : LocalDateTime
+  __
+  # onCreate()
+}
+
+class OrderItem {
+  - id : Long
+  - quantity : Integer
+  - price : Double
+}
+
+class Customer {
+  - id : Long
+  - fullName : String
+  - email : String
+  - phone : String
+  - createdAt : LocalDateTime
+  - updatedAt : LocalDateTime
+}
+
+class ShiftReport {
+  - id : Long
+  - shiftStart : LocalDateTime
+  - shiftEnd : LocalDateTime
+  - totalSales : Double
+  - totalRefunds : Double
+  - netSales : Double
+  - totalOrders : int
+}
+
+class Refund {
+  - id : Long
+  - reason : String
+  - amount : Double
+  - paymentType : PaymentType
+  - createdAt : LocalDateTime
+}
+
+class PaymentSummary {
+  - type : PaymentType
+  - totalAmount : Double
+  - transactionCount : int
+  - percentage : double
+}
+
+class Subscription {
+  - id : Long
+  - startDate : LocalDate
+  - endDate : LocalDate
+  - status : SubscriptionStatus
+  - paymentGateway : PaymentGateway
+  - transactionId : String
+  - paymentStatus : PaymentStatus
+  - createdAt : LocalDateTime
+  - updatedAt : LocalDateTime
+  __
+  # onCreate()
+  # onUpdate()
+}
+
+class SubscriptionPlan {
+  - id : Long
+  - name : String
+  - description : String
+  - price : Double
+  - billingCycle : BillingCycle
+  - maxBranches : Integer
+  - maxUsers : Integer
+  - maxProducts : Integer
+  - enableAdvancedReports : Boolean
+  - enableInventory : Boolean
+  - enableIntegrations : Boolean
+  - enableEcommerce : Boolean
+  - enableInvoiceBranding : Boolean
+  - prioritySupport : Boolean
+  - enableMultiLocation : Boolean
+  - extraFeatures : List<String>
+  - createdAt : LocalDateTime
+  - updatedAt : LocalDateTime
+  __
+  # onCreate()
+  # onUpdate()
+}
+
+class Payment {
+  - id : Long
+  - amount : Double
+  - provider : PaymentGateway
+  - providerPaymentId : String
+  - transactionId : String
+  - method : String
+  - status : PaymentStatus
+  - failureReason : String
+  - paidAt : LocalDateTime
+  - refundId : String
+  - createdAt : Instant
+  - updatedAt : Instant
+  __
+  # onCreate()
+  # onUpdate()
+}
+
+class PaymentOrder {
+  - id : Long
+  - amount : Double
+  - status : PaymentOrderStatus
+  - paymentLinkId : String
+  - planId : Long
+}
+
+class PasswordResetToken {
+  - id : Long
+  - token : String
+  - expiryDate : LocalDateTime
+  __
+  + isExpired() : boolean
+}
+
+' ==================== RELATIONSHIPS ====================
+' --- Store core ---
+Store "1" -- "1" User : storeAdmin >
+Store *-- StoreContact : <<embedded>>
+Store "1" -- "*" Branch
+Store "1" -- "*" Product
+Store "1" -- "*" Category
+
+' --- Branch ---
+Branch "1" -- "0..1" User : manager >
+
+' --- Product & Category ---
+Product "*" -- "1" Category
+
+' --- Inventory ---
+Inventory "*" -- "1" Branch
+Inventory "*" -- "1" Product
+
+' --- Order (Composition: cascade ALL) ---
+Order "1" *-- "*" OrderItem : items
+Order "*" -- "1" Branch
+Order "*" -- "1" User : cashier >
+Order "*" -- "0..1" Customer
+
+' --- OrderItem ---
+OrderItem "*" -- "1" Product
+
+' --- ShiftReport ---
+ShiftReport "*" -- "1" User : cashier >
+ShiftReport "*" -- "1" Branch
+ShiftReport "1" *-- "*" Refund : refunds
+ShiftReport "1" -- "*" Order : recentOrders >
+ShiftReport "1" -- "*" Product : topSellingProducts >
+ShiftReport "1" -- "*" PaymentSummary : paymentSummaries >
+
+' --- Refund ---
+Refund "*" -- "1" Order
+Refund "*" -- "1" User : cashier >
+Refund "*" -- "1" Branch
+
+' --- Subscription ---
+Subscription "*" -- "1" Store
+Subscription "*" -- "1" SubscriptionPlan : plan >
+
+' --- Payment ---
+Payment "*" -- "1" Store
+Payment "1" -- "1" Subscription
+
+' --- PaymentOrder ---
+PaymentOrder "*" -- "1" User
+
+' --- PasswordResetToken ---
+PasswordResetToken "*" -- "1" User
+
+' --- User associations ---
+User "*" -- "0..1" Store
+User "*" -- "0..1" Branch
+
+@enduml

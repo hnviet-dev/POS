@@ -1,0 +1,50 @@
+@startuml
+title Biểu đồ hoạt động: Tạo cửa hàng và Duyệt
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Store Admin|
+start
+:Đăng nhập hệ thống;
+:Nhập thông tin cửa hàng
+(brand, description, storeType, contact);
+
+|Hệ thống|
+:POST /api/stores;
+:Lấy currentUser từ JWT;
+:Tạo Store với storeAdmin = currentUser;
+:Set status = PENDING, createdAt = now();
+:Lưu Store vào Database;
+:Trả về Store (PENDING);
+
+|Store Admin|
+:Hiển thị thông báo:
+"Cửa hàng đang chờ duyệt";
+
+|Super Admin|
+:Đăng nhập hệ thống;
+:Xem danh sách Store có status = PENDING;
+:Chọn Store cần duyệt;
+
+if (Quyết định duyệt?) then (Approve)
+  |Hệ thống|
+  :PUT /stores/{id}/moderate
+  action = APPROVE;
+  :Set status = ACTIVE;
+  :Lưu vào Database;
+  |Store Admin|
+  :Cửa hàng hoạt động
+  Có thể tạo Branch, Product, Employee;
+else (Block)
+  |Hệ thống|
+  :PUT /stores/{id}/moderate
+  action = BLOCK;
+  :Set status = BLOCKED;
+  :Lưu vào Database;
+  |Store Admin|
+  :Cửa hàng bị chặn
+  Không thể sử dụng hệ thống;
+endif
+stop
+@enduml

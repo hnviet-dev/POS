@@ -1,0 +1,54 @@
+@startuml
+title Biểu đồ hoạt động: Quản lý sản phẩm
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Store Admin|
+start
+:Chọn "Quản lý sản phẩm";
+
+|Hệ thống|
+:Tải danh sách sản phẩm của Store;
+:Hiển thị danh sách sản phẩm;
+
+|Store Admin|
+:Chọn "Tạo sản phẩm mới";
+
+|Hệ thống|
+:Hiển thị form tạo sản phẩm;
+
+|Store Admin|
+:Nhập thông tin sản phẩm
+(name, sku, mrp, sellingPrice,
+brand, image, categoryId);
+
+|Hệ thống|
+:POST /api/products;
+:checkAuthority() - Kiểm tra quyền Store Admin;
+
+if (Có quyền?) then (Không)
+  :Trả lỗi: "Unauthorized";
+  |Store Admin|
+  :Hiển thị thông báo lỗi;
+  stop
+else (Có)
+endif
+
+:Kiểm tra Category tồn tại trong Store;
+
+if (Category hợp lệ?) then (Không)
+  :Trả lỗi: "Category not found";
+  |Store Admin|
+  :Hiển thị thông báo lỗi;
+  stop
+else (Có)
+endif
+
+:Tạo Product mới (store, category);
+:Lưu Product vào Database;
+
+|Store Admin|
+:Thông báo tạo sản phẩm thành công;
+stop
+@enduml

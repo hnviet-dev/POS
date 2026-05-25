@@ -1,0 +1,65 @@
+@startuml
+title Biểu đồ tuần tự: Tạo sản phẩm
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Store Admin" as user
+boundary "Form_TaoSanPham" as bd
+control "Control_Product" as ctrl
+entity "Entity_Product" as prod
+entity "Entity_Category" as cat
+entity "Entity_Store" as store
+database "CSDL" as db
+
+user -> bd : Chọn "Tạo sản phẩm"
+activate bd
+bd --> user : Hiển thị form tạo sản phẩm
+user -> bd : Nhập thông tin sản phẩm\n(name, sku, description, mrp,\nsellingPrice, brand, image, categoryId)
+bd -> ctrl : POST /api/products
+activate ctrl
+
+ctrl -> ctrl : Lấy currentUser từ JWT
+ctrl -> store : getStoreByUser(currentUser)
+activate store
+store -> db : SELECT * FROM stores WHERE store_admin_id=?
+activate db
+db --> store : Store
+deactivate db
+store --> ctrl : Store
+deactivate store
+
+ctrl -> ctrl : checkAuthority()
+
+ctrl -> cat : findById(categoryId)
+activate cat
+cat -> db : SELECT * FROM categories WHERE id=?
+activate db
+db --> cat : Category
+deactivate db
+cat --> ctrl : Category
+deactivate cat
+
+alt Category không tồn tại
+    ctrl --> bd : Lỗi: "Category not found"
+    bd --> user : Hiển thị lỗi
+else Category hợp lệ
+    ctrl -> prod : Tạo Product mới\n(store, category)
+    activate prod
+    prod -> db : INSERT INTO products(...)
+    activate db
+    db --> prod : Product ID
+    deactivate db
+    prod --> ctrl : Product đã tạo
+    deactivate prod
+    ctrl --> bd : Trả về Product
+    deactivate ctrl
+    bd --> user : Thông báo tạo sản phẩm thành công
+end
+deactivate bd
+@enduml

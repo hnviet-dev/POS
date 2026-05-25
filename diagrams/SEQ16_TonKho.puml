@@ -1,0 +1,68 @@
+@startuml
+title Biểu đồ tuần tự: Quản lý tồn kho chi nhánh
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Branch Manager" as user
+boundary "ManHinh_TonKho" as bd
+control "Control_Inventory" as ctrl
+entity "Entity_Inventory" as inv
+entity "Entity_Branch" as branch
+database "CSDL" as db
+
+user -> bd : Chọn "Quản lý tồn kho"
+activate bd
+bd -> ctrl : GET /api/inventory?branch=...
+activate ctrl
+ctrl -> ctrl : Lấy branch từ currentUser
+ctrl -> inv : Lấy inventory theo branch
+activate inv
+inv -> db : SELECT i.*, p.name FROM inventory i\nJOIN products p ON i.product_id=p.id\nWHERE i.branch_id=?
+activate db
+db --> inv : List<Inventory>
+deactivate db
+inv --> ctrl : Danh sách tồn kho
+deactivate inv
+ctrl --> bd : Trả danh sách
+deactivate ctrl
+bd --> user : Hiển thị bảng tồn kho\n(SP, số lượng, cảnh báo thấp)
+
+user -> bd : Chọn sản phẩm\nNhập số lượng mới
+bd -> ctrl : PUT /api/inventory/{id}
+activate ctrl
+
+ctrl -> inv : findById(inventoryId)
+activate inv
+inv -> db : SELECT * FROM inventory WHERE id=?
+activate db
+db --> inv : Inventory
+deactivate db
+inv --> ctrl : Inventory
+deactivate inv
+
+ctrl -> ctrl : Kiểm tra quyền\n(branch của user = branch của inventory)
+
+alt Không có quyền
+    ctrl --> bd : Lỗi: "Unauthorized"
+    bd --> user : Hiển thị lỗi
+else Có quyền
+    ctrl -> inv : Cập nhật quantity\nSet lastUpdated = now()
+    activate inv
+    inv -> db : UPDATE inventory\nSET quantity=?, lastUpdated=?
+    activate db
+    db --> inv : OK
+    deactivate db
+    inv --> ctrl : Inventory đã cập nhật
+    deactivate inv
+    ctrl --> bd : Trả về Inventory
+    deactivate ctrl
+    bd --> user : Thông báo cập nhật thành công
+end
+deactivate bd
+@enduml

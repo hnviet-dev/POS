@@ -1,0 +1,20 @@
+THIẾU:
+1. PaymentOrder (id, amount, status, paymentLinkId, planId) -> User
+2. StoreContact (address, phone, email) -> embedded in Store
+3. PasswordResetToken (id, token, expiryDate) -> User
+4. PaymentSummary (type, totalAmount, transactionCount, percentage) -> embedded in ShiftReport
+
+CẦN CẬP NHẬT FIELDS:
+- Branch: thêm city, state, createdAt, updatedAt
+- Product: thêm createdAt, updatedAt
+- ShiftReport: thêm paymentSummaries, topSellingProducts, recentOrders relationships
+- Refund: thêm cashier, branch FK
+- Subscription: thêm paymentStatus, createdAt, updatedAt
+- SubscriptionPlan: thêm enableAdvancedReports, enableInventory, enableIntegrations, enableEcommerce, enableInvoiceBranding, prioritySupport, enableMultiLocation
+- Payment: thêm providerPaymentId, transactionId, method, failureReason, refundId, createdAt, updatedAt
+
+THIẾU ENUMS:
+- BillingCycle (MONTHLY, YEARLY)
+- PaymentGateway (RAZORPAY, STRIPE)
+- PaymentStatus (PENDING, COMPLETED, FAILED)
+- PaymentOrderStatus (PENDING, SUCCESS, FAILED)

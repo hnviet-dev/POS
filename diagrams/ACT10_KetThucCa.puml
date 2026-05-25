@@ -1,0 +1,39 @@
+@startuml
+title Biểu đồ hoạt động: Kết thúc ca làm việc
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Cashier|
+start
+:Nhấn nút "Kết thúc ca";
+
+|Hệ thống|
+:PUT /api/shifts/{id}/close;
+:Set shiftEnd = now();
+:Query tất cả Orders trong khoảng
+shiftStart đến shiftEnd;
+:Query tất cả Refunds trong khoảng
+shiftStart đến shiftEnd;
+:Tính toán:
+totalSales = SUM(orders.totalAmount)
+totalRefunds = SUM(refunds.amount)
+netSales = totalSales - totalRefunds
+totalOrders = COUNT(orders);
+:Tính PaymentSummary:
+Nhóm theo CASH / CARD / UPI
+Tính % và số tiền từng loại;
+:Tính Top 5 sản phẩm bán chạy nhất;
+:Lưu ShiftReport vào Database;
+:Trả về báo cáo ca;
+
+|Cashier|
+:Hiển thị tổng kết ca:
+- Tổng doanh thu
+- Tổng hoàn trả
+- Doanh thu thuần
+- Số đơn hàng
+- Top 5 SP bán chạy
+- Phân bổ thanh toán;
+stop
+@enduml

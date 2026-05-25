@@ -1,0 +1,58 @@
+@startuml
+title Biểu đồ tuần tự: Đăng ký tài khoản
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Người dùng mới" as user
+boundary "Form_DangKy" as bd
+control "Control_DangKy" as ctrl
+entity "Entity_User" as ent
+database "CSDL" as db
+
+user -> bd : Chọn Đăng ký
+activate bd
+bd --> user : Hiển thị form đăng ký
+user -> bd : Nhập thông tin\n(fullName, email, password, phone)
+bd -> ctrl : Gửi thông tin đăng ký
+activate ctrl
+
+ctrl -> ent : findByEmail(email)
+activate ent
+ent -> db : SELECT * FROM users WHERE email=?
+activate db
+db --> ent : Kết quả truy vấn
+deactivate db
+ent --> ctrl : Trả kết quả
+deactivate ent
+
+alt Email đã tồn tại
+    ctrl --> bd : Lỗi: "Email already exists"
+    bd --> user : Hiển thị thông báo lỗi
+else Email chưa tồn tại
+    alt Role = ROLE_ADMIN
+        ctrl --> bd : Lỗi: "Cannot register as Admin"
+        bd --> user : Hiển thị thông báo lỗi
+    else Role hợp lệ
+        ctrl -> ctrl : Mã hóa password\n(BCryptPasswordEncoder)
+        ctrl -> ent : Tạo User mới
+        activate ent
+        ent -> db : INSERT INTO users(...)
+        activate db
+        db --> ent : Lưu thành công
+        deactivate db
+        ent --> ctrl : User đã tạo
+        deactivate ent
+        ctrl -> ctrl : Tạo JWT Token\n(JwtProvider.generateToken)
+        ctrl --> bd : Trả về { jwt, user }
+        deactivate ctrl
+        bd --> user : Lưu JWT vào localStorage\nĐiều hướng vào hệ thống
+    end
+end
+deactivate bd
+@enduml

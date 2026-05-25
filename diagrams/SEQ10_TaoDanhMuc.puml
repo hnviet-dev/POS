@@ -1,0 +1,49 @@
+@startuml
+title Biểu đồ tuần tự: Tạo danh mục sản phẩm
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Store Admin" as user
+boundary "Form_TaoDanhMuc" as bd
+control "Control_Category" as ctrl
+entity "Entity_Category" as ent
+entity "Entity_Store" as store
+database "CSDL" as db
+
+user -> bd : Chọn "Tạo danh mục"
+activate bd
+bd --> user : Hiển thị form tạo danh mục
+user -> bd : Nhập tên danh mục
+bd -> ctrl : POST /api/categories
+activate ctrl
+
+ctrl -> ctrl : Lấy currentUser từ JWT
+ctrl -> store : getStoreByUser(currentUser)
+activate store
+store -> db : SELECT * FROM stores WHERE store_admin_id=?
+activate db
+db --> store : Store
+deactivate db
+store --> ctrl : Store
+deactivate store
+
+ctrl -> ent : Tạo Category mới\n(name, store)
+activate ent
+ent -> db : INSERT INTO categories(...)
+activate db
+db --> ent : Category ID
+deactivate db
+ent --> ctrl : Category đã tạo
+deactivate ent
+
+ctrl --> bd : Trả về Category
+deactivate ctrl
+bd --> user : Thông báo tạo danh mục thành công
+deactivate bd
+@enduml

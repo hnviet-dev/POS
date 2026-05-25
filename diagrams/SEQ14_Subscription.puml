@@ -1,0 +1,103 @@
+@startuml
+title Biểu đồ tuần tự: Đăng ký Subscription
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Store Admin" as user
+boundary "ManHinh_Subscription" as bd
+control "Control_Subscription" as ctrl
+entity "Entity_Subscription" as sub
+entity "Entity_Plan" as plan
+entity "Entity_Payment" as pay
+database "CSDL" as db
+
+user -> bd : Chọn "Nâng cấp gói"
+activate bd
+bd -> ctrl : GET /api/plans
+activate ctrl
+ctrl -> plan : Lấy tất cả SubscriptionPlan
+activate plan
+plan -> db : SELECT * FROM subscription_plans
+activate db
+db --> plan : List<Plan>
+deactivate db
+plan --> ctrl : Danh sách gói
+deactivate plan
+ctrl --> bd : Trả danh sách gói
+deactivate ctrl
+bd --> user : Hiển thị các gói\n(BASIC, PRO, ENTERPRISE)
+
+user -> bd : Chọn gói và nhấn "Đăng ký"
+bd -> ctrl : POST /api/subscriptions/subscribe
+activate ctrl
+
+ctrl -> ctrl : Lấy Store từ currentUser
+ctrl -> sub : Tạo Subscription mới\n(store, plan, status=PENDING)
+activate sub
+sub -> db : INSERT INTO subscriptions(...)
+activate db
+db --> sub : Subscription ID
+deactivate db
+sub --> ctrl : Subscription
+deactivate sub
+
+ctrl -> ctrl : Tạo PaymentLink qua Razorpay API
+ctrl -> pay : Tạo PaymentOrder\n(amount, paymentLinkId)
+activate pay
+pay -> db : INSERT INTO payment_orders(...)
+activate db
+db --> pay : OK
+deactivate db
+pay --> ctrl : PaymentOrder
+deactivate pay
+
+ctrl --> bd : Trả về paymentLinkUrl
+deactivate ctrl
+bd --> user : Redirect đến trang thanh toán Razorpay
+
+user -> bd : Hoàn tất thanh toán trên Razorpay
+bd -> ctrl : Razorpay callback\nGET /api/payments/verify?\npayment_link_id=...&status=...
+activate ctrl
+
+alt Thanh toán thành công
+    ctrl -> sub : Cập nhật Subscription\nstatus = ACTIVE\nstartDate, endDate
+    activate sub
+    sub -> db : UPDATE subscriptions\nSET status='ACTIVE'
+    activate db
+    db --> sub : OK
+    deactivate db
+    sub --> ctrl : OK
+    deactivate sub
+
+    ctrl -> pay : Lưu Payment record
+    activate pay
+    pay -> db : INSERT INTO payments(...)
+    activate db
+    db --> pay : OK
+    deactivate db
+    pay --> ctrl : OK
+    deactivate pay
+
+    ctrl --> bd : Thành công
+    bd --> user : Thông báo đăng ký thành công
+else Thanh toán thất bại
+    ctrl -> sub : status = CANCELLED
+    activate sub
+    sub -> db : UPDATE subscriptions SET status='CANCELLED'
+    activate db
+    db --> sub : OK
+    deactivate db
+    sub --> ctrl : OK
+    deactivate sub
+    ctrl --> bd : Lỗi thanh toán
+    bd --> user : Thông báo thanh toán thất bại
+end
+deactivate ctrl
+deactivate bd
+@enduml

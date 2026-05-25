@@ -1,0 +1,55 @@
+@startuml
+title Biểu đồ tuần tự: Tạm giữ và Khôi phục đơn hàng
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Cashier" as user
+boundary "ManHinh_POS" as bd
+control "Control_Cart" as ctrl
+
+== Giai đoạn 1: Tạm giữ đơn hàng ==
+user -> bd : Thêm sản phẩm vào giỏ hàng
+activate bd
+bd -> ctrl : Redux: addItemToCart()
+activate ctrl
+ctrl -> ctrl : Cập nhật cartSlice state\n(items, subtotal, total)
+ctrl --> bd : Giỏ hàng đã cập nhật
+deactivate ctrl
+bd --> user : Hiển thị giỏ hàng
+
+user -> bd : Nhấn "Tạm giữ" (Hold)
+bd -> ctrl : Redux: holdCurrentCart()
+activate ctrl
+ctrl -> ctrl : Lưu giỏ hàng hiện tại\nvào holdOrders[]\n(lưu trong Redux state)
+ctrl -> ctrl : Tạo giỏ hàng mới (rỗng)
+ctrl --> bd : Giỏ mới + badge hold count
+deactivate ctrl
+bd --> user : Hiển thị giỏ hàng mới\n(giỏ cũ đã được tạm giữ)
+
+== Giai đoạn 2: Phục vụ khách tiếp theo ==
+user -> bd : Phục vụ khách hàng khác\n(thêm SP, thanh toán bình thường)
+bd --> user : Xử lý đơn hàng mới
+
+== Giai đoạn 3: Khôi phục đơn tạm giữ ==
+user -> bd : Nhấn "Đơn tạm giữ" (Held Orders)
+bd -> ctrl : Redux: getHoldOrders()
+activate ctrl
+ctrl --> bd : Danh sách đơn tạm giữ
+deactivate ctrl
+bd --> user : Hiển thị danh sách đơn tạm giữ
+
+user -> bd : Chọn đơn cần khôi phục
+bd -> ctrl : Redux: resumeHoldOrder(index)
+activate ctrl
+ctrl -> ctrl : Lấy đơn từ holdOrders[index]\nXóa khỏi holdOrders[]\nSet làm giỏ hàng hiện tại
+ctrl --> bd : Giỏ hàng đã khôi phục
+deactivate ctrl
+bd --> user : Hiển thị giỏ hàng cũ\n→ Tiếp tục thanh toán
+deactivate bd
+@enduml

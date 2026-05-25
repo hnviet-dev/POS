@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>Biểu đồ lớp - Zosh POS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fff;font-family:'Segoe UI',Arial,sans-serif;overflow:auto}
+#canvas{position:relative;width:2600px;height:2100px;margin:20px}
+.cls{position:absolute;border:2px solid #222;background:#fff;min-width:180px;font-size:11px}
+.cls-name{background:#D4E6F1;text-align:center;font-weight:bold;font-size:13px;padding:4px 8px;border-bottom:2px solid #222}
+.cls-attrs{padding:4px 6px;border-bottom:1px solid #222;white-space:pre;line-height:1.5}
+.cls-methods{padding:4px 6px;white-space:pre;line-height:1.5}
+svg{position:absolute;top:0;left:0;width:2600px;height:2100px;pointer-events:none}
+text{font-family:'Segoe UI',Arial,sans-serif;font-size:11px}
+.title{position:absolute;top:5px;left:20px;font-size:22px;font-weight:bold}
+.enum-box{position:absolute;border:2px solid #555;background:#FFF9E6;min-width:160px;font-size:11px}
+.enum-name{background:#FCF3CF;text-align:center;font-weight:bold;font-size:12px;padding:3px 6px;border-bottom:2px solid #555}
+.enum-vals{padding:4px 6px;white-space:pre;line-height:1.5}
+</style>
+</head><body>
+<div class="title">Biểu đồ lớp tổng quan — Hệ thống Zosh POS</div>
+<div id="canvas">
+
+<!-- ============ USER ============ -->
+<div class="cls" style="left:30px;top:60px;width:230px">
+<div class="cls-name">User</div>
+<div class="cls-attrs">- id: Long
+- fullName: String
+- email: String
+- password: String
+- phone: String
+- role: UserRole
+- verified: Boolean
+- lastLogin: LocalDateTime
+- createdAt: LocalDateTime
+- updatedAt: LocalDateTime</div>
+<div class="cls-methods">+ login()
++ logout()
++ resetPassword()</div>
+</div>
+
+<!-- ============ STORE ============ -->
+<div class="cls" style="left:370px;top:60px;width:240px">
+<div class="cls-name">Store</div>
+<div class="cls-attrs">- id: Long
+- brand: String
+- description: String
+- storeType: String
+- status: StoreStatus
+- contact: StoreContact
+- createdAt: LocalDateTime
+- updatedAt: LocalDateTime</div>
+<div class="cls-methods">+ createStore()
++ updateStore()
++ moderateStore()</div>
+</div>
+
+<!-- ============ STORE CONTACT ============ -->
+<div class="cls" style="left:370px;top:380px;width:200px">
+<div class="cls-name">«Embeddable»&#10;StoreContact</div>
+<div class="cls-attrs">- address: String
+- phone: String
+- email: String</div>
+<div class="cls-methods"></div>
+</div>
+
+<!-- ============ BRANCH ============ -->
+<div class="cls" style="left:720px;top:60px;width:240px">
+<div class="cls-name">Branch</div>
+<div class="cls-attrs">- id: Long
+- name: String
+- address: String
+- phone: String
+- email: String
+- openTime: LocalTime
+- closeTime: LocalTime
+- workingDays: List&lt;String&gt;</div>
+<div class="cls-methods">+ createBranch()
++ updateBranch()
++ deleteBranch()</div>
+</div>
+
+<!-- ============ PRODUCT ============ -->
+<div class="cls" style="left:30px;top:500px;width:230px">
+<div class="cls-name">Product</div>
+<div class="cls-attrs">- id: Long
+- name: String
+- sku: String
+- description: String
+- mrp: Double
+- sellingPrice: Double
+- brand: String
+- image: String</div>
+<div class="cls-methods">+ createProduct()
++ updateProduct()
++ deleteProduct()</div>
+</div>
+
+<!-- ============ CATEGORY ============ -->
+<div class="cls" style="left:30px;top:870px;width:200px">
+<div class="cls-name">Category</div>
+<div class="cls-attrs">- id: Long
+- name: String</div>
+<div class="cls-methods">+ createCategory()
++ getAllCategories()</div>
+</div>
+
+<!-- ============ ORDER ============ -->
+<div class="cls" style="left:720px;top:430px;width:240px">
+<div class="cls-name">Order</div>
+<div class="cls-attrs">- id: Long
+- totalAmount: Double
+- paymentType: PaymentType
+- status: OrderStatus
+- createdAt: LocalDateTime</div>
+<div class="cls-methods">+ createOrder()
++ getOrdersByBranch()
++ deleteOrder()</div>
+</div>
+
+<!-- ============ ORDER ITEM ============ -->
+<div class="cls" style="left:1040px;top:430px;width:210px">
+<div class="cls-name">OrderItem</div>
+<div class="cls-attrs">- id: Long
+- quantity: Integer
+- price: Double</div>
+<div class="cls-methods">+ calculateSubtotal()</div>
+</div>
+
+<!-- ============ CUSTOMER ============ -->
+<div class="cls" style="left:1040px;top:620px;width:200px">
+<div class="cls-name">Customer</div>
+<div class="cls-attrs">- id: Long
+- fullName: String
+- email: String
+- phone: String</div>
+<div class="cls-methods">+ createCustomer()
++ updateCustomer()</div>
+</div>
+
+<!-- ============ INVENTORY ============ -->
+<div class="cls" style="left:370px;top:540px;width:220px">
+<div class="cls-name">Inventory</div>
+<div class="cls-attrs">- id: Long
+- quantity: Integer
+- lastUpdated: LocalDateTime</div>
+<div class="cls-methods">+ updateQuantity()
++ checkLowStock()</div>
+</div>
+
+<!-- ============ SHIFT REPORT ============ -->
+<div class="cls" style="left:720px;top:730px;width:250px">
+<div class="cls-name">ShiftReport</div>
+<div class="cls-attrs">- id: Long
+- shiftStart: LocalDateTime
+- shiftEnd: LocalDateTime
+- totalSales: Double
+- totalRefunds: Double
+- netSales: Double
+- totalOrders: Integer</div>
+<div class="cls-methods">+ startShift()
++ endShift()
++ getCurrentProgress()</div>
+</div>
+
+<!-- ============ REFUND ============ -->
+<div class="cls" style="left:1040px;top:800px;width:230px">
+<div class="cls-name">Refund</div>
+<div class="cls-attrs">- id: Long
+- reason: String
+- amount: Double
+- paymentType: PaymentType
+- createdAt: LocalDateTime</div>
+<div class="cls-methods">+ createRefund()
++ getRefundsByBranch()</div>
+</div>
+
+<!-- ============ PAYMENT SUMMARY ============ -->
+<div class="cls" style="left:720px;top:1060px;width:220px">
+<div class="cls-name">PaymentSummary</div>
+<div class="cls-attrs">- paymentType: PaymentType
+- totalAmount: Double
+- totalTransactions: Integer
+- percentage: Double</div>
+<div class="cls-methods"></div>
+</div>
+
+<!-- ============ SUBSCRIPTION PLAN ============ -->
+<div class="cls" style="left:1350px;top:60px;width:260px">
+<div class="cls-name">SubscriptionPlan</div>
+<div class="cls-attrs">- id: Long
+- name: String
+- description: String
+- price: Double
+- billingCycle: BillingCycle
+- maxBranches: Integer
+- maxUsers: Integer
+- maxProducts: Integer
+- enableAdvancedReports: Boolean
+- enableInventory: Boolean
+- enableIntegrations: Boolean
+- enableEcommerce: Boolean
+- enableInvoiceBranding: Boolean
+- prioritySupport: Boolean</div>
+<div class="cls-methods">+ createPlan()
++ updatePlan()</div>
+</div>
+
+<!-- ============ SUBSCRIPTION ============ -->
+<div class="cls" style="left:1700px;top:60px;width:250px">
+<div class="cls-name">Subscription</div>
+<div class="cls-attrs">- id: Long
+- startDate: LocalDate
+- endDate: LocalDate
+- status: SubscriptionStatus
+- paymentGateway: PaymentGateway
+- paymentStatus: PaymentStatus
+- transactionId: String</div>
+<div class="cls-methods">+ subscribe()
++ upgrade()
++ cancel()</div>
+</div>
+
+<!-- ============ PAYMENT ============ -->
+<div class="cls" style="left:1700px;top:420px;width:250px">
+<div class="cls-name">Payment</div>
+<div class="cls-attrs">- id: Long
+- amount: Double
+- provider: PaymentGateway
+- providerPaymentId: String
+- transactionId: String
+- method: String
+- status: PaymentStatus
+- failureReason: String
+- paidAt: LocalDateTime</div>
+<div class="cls-methods">+ initiatePayment()
++ verifyPayment()</div>
+</div>
+
+<!-- ============ PAYMENT ORDER ============ -->
+<div class="cls" style="left:1350px;top:500px;width:230px">
+<div class="cls-name">PaymentOrder</div>
+<div class="cls-attrs">- id: Long
+- amount: Double
+- status: PaymentStatus
+- paymentLinkId: String</div>
+<div class="cls-methods"></div>
+</div>
+
+<!-- ============ PASSWORD RESET TOKEN ============ -->
+<div class="cls" style="left:30px;top:1020px;width:230px">
+<div class="cls-name">PasswordResetToken</div>
+<div class="cls-attrs">- id: Long
+- token: String
+- expiryDate: LocalDateTime</div>
+<div class="cls-methods">+ isExpired()</div>
+</div>
+
+<!-- ============ ENUMS ============ -->
+<div class="enum-box" style="left:1350px;top:730px;width:180px">
+<div class="enum-name">«enum» UserRole</div>
+<div class="enum-vals">ROLE_ADMIN
+ROLE_STORE_ADMIN
+ROLE_STORE_MANAGER
+ROLE_BRANCH_MANAGER
+ROLE_BRANCH_ADMIN
+ROLE_BRANCH_CASHIER
+ROLE_CUSTOMER</div>
+</div>
+
+<div class="enum-box" style="left:1560px;top:730px;width:170px">
+<div class="enum-name">«enum» OrderStatus</div>
+<div class="enum-vals">COMPLETED
+PENDING
+REFUNDED
+CANCELLED</div>
+</div>
+
+<div class="enum-box" style="left:1560px;top:880px;width:170px">
+<div class="enum-name">«enum» PaymentType</div>
+<div class="enum-vals">CASH
+CARD
+UPI</div>
+</div>
+
+<div class="enum-box" style="left:1760px;top:730px;width:180px">
+<div class="enum-name">«enum» StoreStatus</div>
+<div class="enum-vals">PENDING
+ACTIVE
+BLOCKED</div>
+</div>
+
+<div class="enum-box" style="left:1760px;top:860px;width:180px">
+<div class="enum-name">«enum» SubscriptionStatus</div>
+<div class="enum-vals">TRIAL
+ACTIVE
+EXPIRED
+CANCELLED</div>
+</div>
+
+<div class="enum-box" style="left:1350px;top:960px;width:170px">
+<div class="enum-name">«enum» PaymentStatus</div>
+<div class="enum-vals">PENDING
+SUCCESS
+FAILED</div>
+</div>
+
+<div class="enum-box" style="left:1560px;top:980px;width:170px">
+<div class="enum-name">«enum» BillingCycle</div>
+<div class="enum-vals">MONTHLY
+YEARLY</div>
+</div>
+
+<div class="enum-box" style="left:1760px;top:980px;width:170px">
+<div class="enum-name">«enum» PaymentGateway</div>
+<div class="enum-vals">RAZORPAY
+STRIPE</div>
+</div>
+
+<!-- ============ SVG RELATIONSHIPS ============ -->
+<svg>
+<defs>
+<marker id="diamond" markerWidth="12" markerHeight="8" refX="12" refY="4" orient="auto"><polygon points="0,4 6,0 12,4 6,8" fill="#fff" stroke="#222" stroke-width="1.5"/></marker>
+<marker id="diamondFill" markerWidth="12" markerHeight="8" refX="12" refY="4" orient="auto"><polygon points="0,4 6,0 12,4 6,8" fill="#222" stroke="#222" stroke-width="1.5"/></marker>
+<marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0,0 10,3.5 0,7" fill="#222"/></marker>
+<marker id="arrowOpen" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polyline points="0,0 10,3.5 0,7" fill="none" stroke="#222" stroke-width="1.5"/></marker>
+</defs>
+
+<!-- User 1--1 Store (storeAdmin) -->
+<line x1="260" y1="140" x2="370" y2="140" stroke="#222" stroke-width="1.5"/>
+<text x="272" y="133" font-size="10">1</text>
+<text x="352" y="133" font-size="10">1</text>
+<text x="290" y="125" font-size="9" fill="#666">storeAdmin</text>
+
+<!-- User N--1 Store (belongs to) -->
+<line x1="260" y1="180" x2="370" y2="180" stroke="#222" stroke-width="1.5"/>
+<text x="272" y="195" font-size="10">N</text>
+<text x="352" y="195" font-size="10">0..1</text>
+<text x="290" y="200" font-size="9" fill="#666">store</text>
+
+<!-- User N--0..1 Branch -->
+<line x1="260" y1="220" x2="350" y2="220" stroke="#222" stroke-width="1.5"/>
+<line x1="350" y1="220" x2="350" y2="30" stroke="#222" stroke-width="1.5"/>
+<line x1="350" y1="30" x2="720" y2="30" stroke="#222" stroke-width="1.5"/>
+<line x1="720" y1="30" x2="720" y2="60" stroke="#222" stroke-width="1.5"/>
+<text x="272" y="215" font-size="10">N</text>
+<text x="700" y="55" font-size="10">0..1</text>
+<text x="500" y="25" font-size="9" fill="#666">branch</text>
+
+<!-- Store 1--N Branch -->
+<line x1="610" y1="140" x2="720" y2="140" stroke="#222" stroke-width="1.5" marker-start="url(#diamond)"/>
+<text x="618" y="133" font-size="10">1</text>
+<text x="700" y="133" font-size="10">N</text>
+
+<!-- Store 1--N Product -->
+<line x1="370" y1="310" x2="260" y2="310" stroke="#222" stroke-width="1.5"/>
+<line x1="260" y1="310" x2="260" y2="500" stroke="#222" stroke-width="1.5"/>
+<text x="275" y="305" font-size="10">1</text>
+<text x="265" y="497" font-size="10">N</text>
+<text x="268" y="400" font-size="9" fill="#666">store</text>
+
+<!-- Store 1--N Category -->
+<line x1="370" y1="340" x2="230" y2="340" stroke="#222" stroke-width="1.5"/>
+<line x1="230" y1="340" x2="230" y2="870" stroke="#222" stroke-width="1.5"/>
+<text x="340" y="335" font-size="10">1</text>
+<text x="215" y="867" font-size="10">N</text>
+
+<!-- Store embedded StoreContact -->
+<line x1="470" y1="310" x2="470" y2="380" stroke="#222" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="480" y="350" font-size="9" fill="#666">«embedded»</text>
+
+<!-- Store 1--N Subscription -->
+<line x1="610" y1="100" x2="1000" y2="100" stroke="#222" stroke-width="1.5"/>
+<line x1="1000" y1="100" x2="1000" y2="20" stroke="#222" stroke-width="1.5"/>
+<line x1="1000" y1="20" x2="1800" y2="20" stroke="#222" stroke-width="1.5"/>
+<line x1="1800" y1="20" x2="1800" y2="60" stroke="#222" stroke-width="1.5"/>
+<text x="618" y="95" font-size="10">1</text>
+<text x="1780" y="56" font-size="10">N</text>
+
+<!-- Store 1--N Payment -->
+<line x1="610" y1="280" x2="660" y2="280" stroke="#222" stroke-width="1.5"/>
+<line x1="660" y1="280" x2="660" y2="1100" stroke="#222" stroke-width="1.5"/>
+<line x1="660" y1="1100" x2="2000" y2="1100" stroke="#222" stroke-width="1.5"/>
+<line x1="2000" y1="1100" x2="2000" y2="760" stroke="#222" stroke-width="1.5"/>
+<text x="618" y="275" font-size="10">1</text>
+<text x="1985" y="770" font-size="10">N</text>
+
+<!-- Product N--1 Category -->
+<line x1="145" y1="830" x2="145" y2="870" stroke="#222" stroke-width="1.5"/>
+<text x="150" y="845" font-size="10">N</text>
+<text x="150" y="870" font-size="10">1</text>
+<text x="155" y="858" font-size="9" fill="#666">category</text>
+
+<!-- Product 1--N OrderItem -->
+<line x1="260" y1="600" x2="330" y2="600" stroke="#222" stroke-width="1.5"/>
+<line x1="330" y1="600" x2="330" y2="490" stroke="#222" stroke-width="1.5"/>
+<line x1="330" y1="490" x2="1040" y2="490" stroke="#222" stroke-width="1.5"/>
+<text x="268" y="595" font-size="10">1</text>
+<text x="1020" y="485" font-size="10">N</text>
+
+<!-- Product 1--N Inventory -->
+<line x1="260" y1="640" x2="370" y2="640" stroke="#222" stroke-width="1.5"/>
+<text x="268" y="635" font-size="10">1</text>
+<text x="355" y="635" font-size="10">N</text>
+<text x="300" y="630" font-size="9" fill="#666">product</text>
+
+<!-- Branch 1--N Inventory -->
+<line x1="720" y1="340" x2="680" y2="340" stroke="#222" stroke-width="1.5"/>
+<line x1="680" y1="340" x2="680" y2="580" stroke="#222" stroke-width="1.5"/>
+<line x1="680" y1="580" x2="590" y2="580" stroke="#222" stroke-width="1.5"/>
+<text x="695" y="345" font-size="10">1</text>
+<text x="598" y="575" font-size="10">N</text>
+<text x="630" y="400" font-size="9" fill="#666">branch</text>
+
+<!-- Branch 1--N Order -->
+<line x1="840" y1="380" x2="840" y2="430" stroke="#222" stroke-width="1.5" marker-start="url(#diamond)"/>
+<text x="847" y="395" font-size="10">1</text>
+<text x="847" y="428" font-size="10">N</text>
+
+<!-- Branch 1--N ShiftReport -->
+<line x1="840" y1="380" x2="840" y2="410" stroke="#222" stroke-width="1.5"/>
+<line x1="960" y1="380" x2="960" y2="410" stroke="#222" stroke-width="1.5"/>
+<line x1="960" y1="410" x2="960" y2="730" stroke="#222" stroke-width="1.5"/>
+<text x="965" y="420" font-size="10">1</text>
+<text x="965" y="726" font-size="10">N</text>
+
+<!-- Order 1--N OrderItem -->
+<line x1="960" y1="510" x2="1040" y2="510" stroke="#222" stroke-width="1.5" marker-start="url(#diamondFill)"/>
+<text x="968" y="505" font-size="10">1</text>
+<text x="1022" y="505" font-size="10">N</text>
+
+<!-- Order N--1 User (cashier) -->
+<line x1="720" y1="520" x2="680" y2="520" stroke="#222" stroke-width="1.5"/>
+<line x1="680" y1="520" x2="300" y2="520" stroke="#222" stroke-width="1.5"/>
+<line x1="300" y1="520" x2="300" y2="460" stroke="#222" stroke-width="1.5"/>
+<line x1="300" y1="460" x2="260" y2="460" stroke="#222" stroke-width="1.5"/>
+<text x="702" y="515" font-size="10">N</text>
+<text x="262" y="455" font-size="10">1</text>
+<text x="420" y="515" font-size="9" fill="#666">cashier</text>
+
+<!-- Order N--0..1 Customer -->
+<line x1="960" y1="600" x2="1040" y2="600" stroke="#222" stroke-width="1.5"/>
+<line x1="1040" y1="600" x2="1040" y2="620" stroke="#222" stroke-width="1.5"/>
+<text x="965" y="595" font-size="10">N</text>
+<text x="1025" y="618" font-size="10">0..1</text>
+
+<!-- Order 1--N Refund -->
+<line x1="960" y1="620" x2="1100" y2="620" stroke="#222" stroke-width="1.5"/>
+<line x1="1100" y1="620" x2="1100" y2="800" stroke="#222" stroke-width="1.5"/>
+<text x="968" y="616" font-size="10">1</text>
+<text x="1085" y="797" font-size="10">N</text>
+
+<!-- ShiftReport N--1 User (cashier) -->
+<line x1="720" y1="850" x2="160" y2="850" stroke="#222" stroke-width="1.5"/>
+<line x1="160" y1="850" x2="160" y2="460" stroke="#222" stroke-width="1.5"/>
+<text x="700" y="845" font-size="10">N</text>
+<text x="148" y="465" font-size="10">1</text>
+<text x="400" y="843" font-size="9" fill="#666">cashier</text>
+
+<!-- ShiftReport 1--N Refund -->
+<line x1="970" y1="900" x2="1040" y2="900" stroke="#222" stroke-width="1.5"/>
+<text x="978" y="895" font-size="10">1</text>
+<text x="1022" y="895" font-size="10">N</text>
+
+<!-- SubscriptionPlan 1--N Subscription -->
+<line x1="1610" y1="180" x2="1700" y2="180" stroke="#222" stroke-width="1.5"/>
+<text x="1618" y="175" font-size="10">1</text>
+<text x="1683" y="175" font-size="10">N</text>
+
+<!-- Subscription 1--1 Payment -->
+<line x1="1825" y1="380" x2="1825" y2="420" stroke="#222" stroke-width="1.5"/>
+<text x="1832" y="395" font-size="10">1</text>
+<text x="1832" y="418" font-size="10">0..1</text>
+
+<!-- PasswordResetToken N--1 User -->
+<line x1="145" y1="1020" x2="145" y2="460" stroke="#222" stroke-width="1.5"/>
+<text x="150" y="1015" font-size="10">N</text>
+<text x="125" y="465" font-size="10">1</text>
+<text x="100" y="700" font-size="9" fill="#666" transform="rotate(-90,100,700)">user</text>
+
+<!-- Branch 1--1 User (manager) -->
+<line x1="720" y1="250" x2="260" y2="250" stroke="#222" stroke-width="1.5"/>
+<text x="700" y="245" font-size="10">1</text>
+<text x="268" y="245" font-size="10">0..1</text>
+<text x="450" y="243" font-size="9" fill="#666">manager</text>
+
+<!-- Refund N--1 Branch -->
+<line x1="1270" y1="830" x2="1300" y2="830" stroke="#222" stroke-width="1.5"/>
+<line x1="1300" y1="830" x2="1300" y2="300" stroke="#222" stroke-width="1.5"/>
+<line x1="1300" y1="300" x2="960" y2="300" stroke="#222" stroke-width="1.5"/>
+<text x="1275" y="825" font-size="10">N</text>
+<text x="965" y="295" font-size="10">1</text>
+<text x="1100" y="293" font-size="9" fill="#666">branch</text>
+
+</svg>
+</div>
+</body></html>

@@ -1,0 +1,71 @@
+@startuml
+title Biểu đồ tuần tự: Duyệt cửa hàng
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Super Admin" as admin
+boundary "ManHinh_DuyetStore" as bd
+control "Control_Store" as ctrl
+entity "Entity_Store" as ent
+database "CSDL" as db
+
+admin -> bd : Xem danh sách Store PENDING
+activate bd
+bd -> ctrl : GET /api/stores/pending
+activate ctrl
+ctrl -> ent : Tìm stores có status=PENDING
+activate ent
+ent -> db : SELECT * FROM stores WHERE status='PENDING'
+activate db
+db --> ent : Danh sách stores
+deactivate db
+ent --> ctrl : List<Store>
+deactivate ent
+ctrl --> bd : Trả danh sách
+deactivate ctrl
+bd --> admin : Hiển thị danh sách chờ duyệt
+
+admin -> bd : Chọn Store cần duyệt
+bd -> ctrl : PUT /api/stores/{id}/moderate
+activate ctrl
+ctrl -> ent : findById(id)
+activate ent
+ent -> db : SELECT * FROM stores WHERE id=?
+activate db
+db --> ent : Store
+deactivate db
+ent --> ctrl : Store
+deactivate ent
+
+alt action = APPROVE
+    ctrl -> ent : Set status = ACTIVE
+    activate ent
+    ent -> db : UPDATE stores SET status='ACTIVE'
+    activate db
+    db --> ent : OK
+    deactivate db
+    ent --> ctrl : Store (ACTIVE)
+    deactivate ent
+    ctrl --> bd : Trả về Store đã duyệt
+    bd --> admin : Thông báo: Đã duyệt thành công
+else action = BLOCK
+    ctrl -> ent : Set status = BLOCKED
+    activate ent
+    ent -> db : UPDATE stores SET status='BLOCKED'
+    activate db
+    db --> ent : OK
+    deactivate db
+    ent --> ctrl : Store (BLOCKED)
+    deactivate ent
+    ctrl --> bd : Trả về Store bị chặn
+    bd --> admin : Thông báo: Đã chặn cửa hàng
+end
+deactivate ctrl
+deactivate bd
+@enduml

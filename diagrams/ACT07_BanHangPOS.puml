@@ -1,0 +1,53 @@
+@startuml
+title Biểu đồ hoạt động: Luồng bán hàng POS
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Cashier|
+start
+:Mở màn hình POS;
+
+|Hệ thống|
+:GET /api/products
+Tải danh sách sản phẩm theo chi nhánh;
+:Hiển thị danh sách sản phẩm;
+
+|Cashier|
+repeat
+  :Tìm kiếm sản phẩm
+  (theo tên hoặc mã barcode);
+  :Chọn sản phẩm, nhập số lượng;
+
+  |Hệ thống|
+  :Redux: cartSlice.addItem()
+  Tính subtotal, tax, total
+  realtime trên Frontend;
+
+  |Cashier|
+repeat while (Thêm sản phẩm tiếp?) is (Có)
+->Không;
+
+:Chọn khách hàng (tùy chọn);
+:Chọn phương thức thanh toán
+(CASH / CARD / UPI);
+:Nhấn nút "Thanh toán";
+
+|Hệ thống|
+:POST /api/orders;
+:Lấy cashier, branch từ JWT;
+:Tạo Order (status = COMPLETED,
+paymentType, totalAmount);
+:Lưu Order vào Database;
+:Lưu từng OrderItem vào Database;
+:Redux: clearCart() - Xóa giỏ hàng;
+
+|Cashier|
+:Hiển thị hóa đơn thành công;
+
+if (In hóa đơn?) then (Có)
+  :In hóa đơn;
+else (Không)
+endif
+stop
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+title Biểu đồ hoạt động: Xem báo cáo Analytics
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+
+|Store Admin / Branch Manager|
+start
+:Chọn menu "Báo cáo";
+
+|Hệ thống|
+:Hiển thị trang báo cáo;
+
+|Store Admin / Branch Manager|
+:Chọn loại báo cáo
+(Doanh thu / Sản phẩm / Thanh toán);
+:Chọn khoảng thời gian
+(Hôm nay / Tuần / Tháng / Năm);
+
+|Hệ thống|
+:GET /api/analytics/...
+với params period, branch;
+:Xác định timeRange từ period;
+:Query Orders trong khoảng thời gian;
+:Query Refunds trong khoảng thời gian;
+:Tính toán aggregate:
+- Tổng doanh thu
+- Tổng hoàn trả
+- Doanh thu thuần
+- Nhóm theo ngày/tuần/tháng
+- Top sản phẩm bán chạy
+- Phân bổ thanh toán (CASH/CARD/UPI);
+:Trả về dữ liệu báo cáo (JSON);
+:Vẽ biểu đồ bằng Recharts
+(BarChart, LineChart, PieChart);
+
+|Store Admin / Branch Manager|
+:Xem báo cáo trực quan;
+stop
+@enduml

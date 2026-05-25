@@ -1,0 +1,77 @@
+@startuml
+title Biểu đồ tuần tự: Hoàn trả đơn hàng
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Cashier" as user
+boundary "ManHinh_HoanTra" as bd
+control "Control_Refund" as ctrl
+entity "Entity_Refund" as ref
+entity "Entity_Order" as ord
+database "CSDL" as db
+
+user -> bd : Chọn "Hoàn trả"
+activate bd
+bd -> ctrl : GET /api/orders?branch=...
+activate ctrl
+ctrl -> ord : Lấy danh sách đơn hàng
+activate ord
+ord -> db : SELECT * FROM orders\nWHERE branch_id=?
+activate db
+db --> ord : List<Order>
+deactivate db
+ord --> ctrl : Danh sách đơn
+deactivate ord
+ctrl --> bd : Trả danh sách
+deactivate ctrl
+bd --> user : Hiển thị danh sách đơn hàng
+
+user -> bd : Chọn đơn hàng cần hoàn trả
+user -> bd : Nhập lý do hoàn trả
+bd -> ctrl : POST /api/refunds
+activate ctrl
+
+ctrl -> ctrl : Lấy cashier từ JWT
+ctrl -> ord : findById(orderId)
+activate ord
+ord -> db : SELECT * FROM orders WHERE id=?
+activate db
+db --> ord : Order
+deactivate db
+ord --> ctrl : Order
+deactivate ord
+
+alt Order không tồn tại hoặc đã REFUNDED
+    ctrl --> bd : Lỗi: "Order not found\nhoặc đã hoàn trả"
+    bd --> user : Hiển thị lỗi
+else Order hợp lệ
+    ctrl -> ref : Tạo Refund mới\n(order, reason, amount,\npaymentType, cashier, branch)
+    activate ref
+    ref -> db : INSERT INTO refunds(...)
+    activate db
+    db --> ref : Refund ID
+    deactivate db
+    ref --> ctrl : Refund đã tạo
+    deactivate ref
+
+    ctrl -> ord : Cập nhật Order\nstatus = REFUNDED
+    activate ord
+    ord -> db : UPDATE orders SET status='REFUNDED'
+    activate db
+    db --> ord : OK
+    deactivate db
+    ord --> ctrl : OK
+    deactivate ord
+
+    ctrl --> bd : Trả về Refund
+    deactivate ctrl
+    bd --> user : Thông báo hoàn trả thành công
+end
+deactivate bd
+@enduml

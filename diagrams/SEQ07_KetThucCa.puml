@@ -1,0 +1,64 @@
+@startuml
+title Biểu đồ tuần tự: Kết thúc ca làm việc
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Cashier" as user
+boundary "ManHinh_Shift" as bd
+control "Control_Shift" as ctrl
+entity "Entity_ShiftReport" as shift
+entity "Entity_Order" as ord
+entity "Entity_Refund" as ref
+database "CSDL" as db
+
+user -> bd : Nhấn "Kết thúc ca"
+activate bd
+bd -> ctrl : PUT /api/shifts/{id}/close
+activate ctrl
+
+ctrl -> ctrl : Set shiftEnd = now()
+
+ctrl -> ord : Lấy orders trong ca
+activate ord
+ord -> db : SELECT * FROM orders\nWHERE cashier=? AND createdAt\nBETWEEN shiftStart AND shiftEnd
+activate db
+db --> ord : List<Order>
+deactivate db
+ord --> ctrl : Danh sách đơn hàng
+deactivate ord
+
+ctrl -> ref : Lấy refunds trong ca
+activate ref
+ref -> db : SELECT * FROM refunds\nWHERE cashier=? AND createdAt\nBETWEEN shiftStart AND shiftEnd
+activate db
+db --> ref : List<Refund>
+deactivate db
+ref --> ctrl : Danh sách hoàn trả
+deactivate ref
+
+ctrl -> ctrl : Tính toán:\ntotalSales = SUM(orders)\ntotalRefunds = SUM(refunds)\nnetSales = totalSales - totalRefunds\ntotalOrders = COUNT(orders)
+
+ctrl -> ctrl : Tính PaymentSummary\n(nhóm theo CASH/CARD/UPI)
+
+ctrl -> ctrl : Tính Top 5 sản phẩm\nbán chạy nhất
+
+ctrl -> shift : Lưu ShiftReport
+activate shift
+shift -> db : UPDATE shift_reports SET\ntotalSales=?, totalRefunds=?,\nnetSales=?, shiftEnd=?
+activate db
+db --> shift : OK
+deactivate db
+shift --> ctrl : ShiftReport
+deactivate shift
+
+ctrl --> bd : Trả về báo cáo ca
+deactivate ctrl
+bd --> user : Hiển thị tổng kết ca:\n- Tổng doanh thu\n- Tổng hoàn trả\n- Doanh thu thuần\n- Top 5 SP bán chạy
+deactivate bd
+@enduml

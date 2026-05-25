@@ -1,0 +1,65 @@
+@startuml
+title Biểu đồ tuần tự: Thêm nhân viên
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor black
+    LifeLineBorderColor black
+    LifeLineBackgroundColor white
+    ParticipantBorderColor black
+    ParticipantBackgroundColor white
+}
+
+actor "Store Admin" as admin
+boundary "Form_ThemNV" as bd
+control "Control_User" as ctrl
+entity "Entity_User" as ent
+entity "Entity_Branch" as branch
+database "CSDL" as db
+
+admin -> bd : Chọn "Thêm nhân viên"
+activate bd
+bd --> admin : Hiển thị form thêm nhân viên
+admin -> bd : Nhập thông tin\n(fullName, email, password,\nphone, role, branchId)
+bd -> ctrl : POST /api/users/add-employee
+activate ctrl
+
+ctrl -> ctrl : Lấy currentUser từ JWT\nKiểm tra quyền Store Admin
+
+ctrl -> ent : findByEmail(email)
+activate ent
+ent -> db : SELECT * FROM users WHERE email=?
+activate db
+db --> ent : Kết quả
+deactivate db
+ent --> ctrl : Kết quả
+deactivate ent
+
+alt Email đã tồn tại
+    ctrl --> bd : Lỗi: "Email already exists"
+    bd --> admin : Hiển thị lỗi
+else Email chưa tồn tại
+    ctrl -> branch : findById(branchId)
+    activate branch
+    branch -> db : SELECT * FROM branches WHERE id=?
+    activate db
+    db --> branch : Branch
+    deactivate db
+    branch --> ctrl : Branch
+    deactivate branch
+
+    ctrl -> ctrl : BCrypt encode password
+    ctrl -> ent : Tạo User mới\n(role, store, branch)
+    activate ent
+    ent -> db : INSERT INTO users(...)
+    activate db
+    db --> ent : User ID
+    deactivate db
+    ent --> ctrl : User đã tạo
+    deactivate ent
+
+    ctrl --> bd : Trả về User
+    deactivate ctrl
+    bd --> admin : Thông báo thêm nhân viên thành công
+end
+deactivate bd
+@enduml
