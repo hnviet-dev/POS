@@ -14,6 +14,8 @@ import { getStoreByAdmin } from "./Redux Toolkit/features/store/storeThunks";
 import SuperAdminRoutes from "./routes/SuperAdminRoutes";
 import PageNotFound from "./pages/common/PageNotFound";
 import AiChatWidget from "./components/AiChatWidget";
+import StorePending from "./pages/common/StorePending";
+import StoreBlocked from "./pages/common/StoreBlocked";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -65,9 +67,8 @@ const App = () => {
       userProfile.role === "ROLE_STORE_ADMIN" ||
       userProfile.role === "ROLE_STORE_MANAGER"
     ) {
-      // console.log("get inside", store);
       if (!store) {
-        // console.log("get inside 1");
+        // Chưa có store → vào onboarding tạo store
         content = (
           <Routes>
             <Route path="/auth/onboarding" element={<Onboarding />} />
@@ -78,8 +79,26 @@ const App = () => {
           </Routes>
         );
         return content;
+      } else if (store.status === "PENDING") {
+        // Store đang chờ duyệt
+        content = (
+          <Routes>
+            <Route path="/" element={<Navigate to="/store-pending" replace />} />
+            <Route path="/store-pending" element={<StorePending />} />
+            <Route path="*" element={<Navigate to="/store-pending" replace />} />
+          </Routes>
+        );
+      } else if (store.status === "BLOCKED") {
+        // Store bị từ chối / khóa
+        content = (
+          <Routes>
+            <Route path="/" element={<Navigate to="/store-blocked" replace />} />
+            <Route path="/store-blocked" element={<StoreBlocked />} />
+            <Route path="*" element={<Navigate to="/store-blocked" replace />} />
+          </Routes>
+        );
       } else {
-        // console.log("get inside 2");
+        // Store ACTIVE → vào dashboard bình thường
         content = (
           <Routes>
             <Route path="/" element={<Navigate to="/store" replace />} />
