@@ -6,11 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     Inventory findByProductId(Long productId);
 
     List<Inventory> findByBranchId(Long branchId);
+
+    Optional<Inventory> findByBranchIdAndProductId(Long branchId, Long productId);
 
     @Query("""
                 SELECT COUNT(i)

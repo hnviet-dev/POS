@@ -7,16 +7,19 @@ import com.zosh.exception.UserException;
 import com.zosh.mapper.OrderMapper;
 import com.zosh.modal.*;
 import com.zosh.payload.dto.OrderDTO;
+import com.zosh.payload.dto.OrderItemDTO;
 import com.zosh.repository.*;
 
 import com.zosh.service.OrderService;
 import com.zosh.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,9 +31,11 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final BranchRepository branchRepository;
     private final UserRepository userRepository;
+    private final InventoryRepository inventoryRepository;
     private final UserService userService;
 
     @Override
+    @Transactional
     public OrderDTO createOrder(OrderDTO dto) throws UserException {
         User cashier = userService.getCurrentUser();
 
@@ -42,7 +47,6 @@ public class OrderServiceImpl implements OrderService {
             branch = branchRepository.findById(dto.getBranchId())
                     .orElse(null);
             if (branch != null) {
-                // Tự động gán branch cho cashier và lưu vào DB để fix data
                 cashier.setBranch(branch);
                 userRepository.save(cashier);
             }
@@ -54,31 +58,62 @@ public class OrderServiceImpl implements OrderService {
             );
         }
 
+        final Branch finalBranch = branch;
+
+        // Bước 1: Kiểm tra tồn kho trước khi tạo order (fail-fast)
+        for (OrderItemDTO itemDto : dto.getItems()) {
+            Inventory inventory = inventoryRepository
+                    .findByBranchIdAndProductId(finalBranch.getId(), itemDto.getProductId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Sản phẩm chưa được nhập kho tại chi nhánh này (productId=" + itemDto.getProductId() + ")"));
+
+            if (inventory.getQuantity() < itemDto.getQuantity()) {
+                Product product = productRepository.findById(itemDto.getProductId())
+                        .orElse(null);
+                String productName = product != null ? product.getName() : "ID=" + itemDto.getProductId();
+                throw new UserException(
+                        "Không đủ tồn kho cho sản phẩm '" + productName + "'"
+                        + " (còn " + inventory.getQuantity() + ", cần " + itemDto.getQuantity() + ")");
+            }
+        }
+
+        // Bước 2: Tạo Order
         Order order = Order.builder()
-                .branch(branch)
+                .branch(finalBranch)
                 .cashier(cashier)
                 .customer(dto.getCustomer())
                 .paymentType(dto.getPaymentType())
                 .build();
 
-        List<OrderItem> orderItems = dto.getItems().stream().map(itemDto -> {
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (OrderItemDTO itemDto : dto.getItems()) {
             Product product = productRepository.findById(itemDto.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-            return OrderItem.builder()
+            orderItems.add(OrderItem.builder()
                     .product(product)
                     .quantity(itemDto.getQuantity())
                     .price(product.getSellingPrice() * itemDto.getQuantity())
                     .order(order)
-
-                    .build();
-        }).toList();
+                    .build());
+        }
 
         double total = orderItems.stream().mapToDouble(OrderItem::getPrice).sum();
         order.setTotalAmount(total);
         order.setItems(orderItems);
 
-        return OrderMapper.toDto(orderRepository.save(order));
+        OrderDTO savedOrder = OrderMapper.toDto(orderRepository.save(order));
+
+        // Bước 3: Trừ tồn kho sau khi order đã được lưu thành công
+        for (OrderItemDTO itemDto : dto.getItems()) {
+            Inventory inventory = inventoryRepository
+                    .findByBranchIdAndProductId(finalBranch.getId(), itemDto.getProductId())
+                    .get(); // đã kiểm tra ở bước 1, không thể null ở đây
+            inventory.setQuantity(inventory.getQuantity() - itemDto.getQuantity());
+            inventoryRepository.save(inventory);
+        }
+
+        return savedOrder;
     }
 
     @Override

@@ -3,13 +3,10 @@ package com.zosh.service.impl;
 import com.zosh.domain.OrderStatus;
 import com.zosh.exception.ResourceNotFoundException;
 import com.zosh.exception.UserException;
-import com.zosh.mapper.RefundMapper;
-import com.zosh.modal.Branch;
-import com.zosh.modal.Order;
-import com.zosh.modal.Refund;
-import com.zosh.modal.User;
+import com.zosh.modal.*;
 import com.zosh.payload.dto.RefundDTO;
 import com.zosh.repository.BranchRepository;
+import com.zosh.repository.InventoryRepository;
 import com.zosh.repository.OrderRepository;
 import com.zosh.repository.RefundRepository;
 import com.zosh.service.RefundService;
@@ -21,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +27,7 @@ public class RefundServiceImpl implements RefundService {
     private final OrderRepository orderRepository;
     private final UserService userService;
     private final BranchRepository branchRepository;
+    private final InventoryRepository inventoryRepository;
 
     @Override
     @Transactional
@@ -40,8 +37,12 @@ public class RefundServiceImpl implements RefundService {
         Order order = orderRepository.findById(refundDTO.getOrderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        Branch branch=branchRepository.findById(refundDTO.getBranchId()).orElseThrow(
-                ()-> new EntityNotFoundException("branch not found")
+        if (order.getStatus() == OrderStatus.REFUNDED) {
+            throw new UserException("Đơn hàng này đã được hoàn tiền trước đó");
+        }
+
+        Branch branch = branchRepository.findById(refundDTO.getBranchId()).orElseThrow(
+                () -> new EntityNotFoundException("Branch not found")
         );
 
         Refund refund = new Refund();
@@ -52,10 +53,23 @@ public class RefundServiceImpl implements RefundService {
         refund.setCreatedAt(LocalDateTime.now());
         refund.setBranch(branch);
 
+        Refund savedRefund = refundRepository.save(refund);
 
-        Refund savedRefund=refundRepository.save(refund);
         order.setStatus(OrderStatus.REFUNDED);
         orderRepository.save(order);
+
+        // Hoàn trả tồn kho cho từng sản phẩm trong order
+        if (order.getItems() != null) {
+            for (OrderItem item : order.getItems()) {
+                inventoryRepository
+                        .findByBranchIdAndProductId(branch.getId(), item.getProduct().getId())
+                        .ifPresent(inventory -> {
+                            inventory.setQuantity(inventory.getQuantity() + item.getQuantity());
+                            inventoryRepository.save(inventory);
+                        });
+            }
+        }
+
         return savedRefund;
     }
 
