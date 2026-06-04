@@ -1,19 +1,17 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Search, Barcode, Loader2, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import ProductCard from "./ProductCard";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   getProductsByStore,
   searchProducts,
 } from "../../../Redux Toolkit/features/product/productThunks";
 import { getBranchById } from "../../../Redux Toolkit/features/branch/branchThunks";
 import { clearSearchResults } from '@/Redux Toolkit/features/product/productSlice';
+import { getInventoryByBranch } from "../../../Redux Toolkit/features/inventory/inventoryThunks";
 
 const ProductSection = ({ searchInputRef }) => {
   const dispatch = useDispatch();
@@ -26,8 +24,18 @@ const ProductSection = ({ searchInputRef }) => {
     loading,
     error: productsError
   } = useSelector((state) => state.product);
+  const { inventories } = useSelector((state) => state.inventory);
 
   const { toast } = useToast();
+
+  // Map productId → quantity cho branch hiện tại
+  const inventoryMap = useMemo(() => {
+    const map = {};
+    (inventories || []).forEach((inv) => {
+      map[inv.productId] = inv.quantity;
+    });
+    return map;
+  }, [inventories]);
 
 
 
@@ -38,42 +46,32 @@ const ProductSection = ({ searchInputRef }) => {
     return products || [];
   };
 
-  // Fetch products when component mounts or when branch changes
+  // Fetch products + inventory khi branch thay đổi
   useEffect(() => {
-    const fetchProducts = async () => {
-      console.log("Fetching products...", { branch, userProfile });
-
-      // Wait for branch to be loaded
+    const fetchData = async () => {
       if (branch?.storeId && localStorage.getItem("jwt")) {
-        console.log("Fetching products for branch:", branch.storeId);
         try {
-          await dispatch(
-            getProductsByStore(branch.storeId)
-          ).unwrap();
+          await dispatch(getProductsByStore(branch.storeId)).unwrap();
         } catch (error) {
-          console.error("Failed to fetch products:", error);
           toast({
             title: "Error",
             description: error || "Failed to fetch products",
             variant: "destructive",
           });
         }
-      } else if (
-        userProfile?.branchId &&
-        localStorage.getItem("jwt") &&
-        !branch
-      ) {
-        // If branch is not loaded but we have branchId in userProfile, fetch branch first
-        console.log("Fetching branch first:", userProfile.branchId);
+
+        // Fetch inventory của branch để hiển thị tồn kho trên card
+        try {
+          await dispatch(getInventoryByBranch(branch.id)).unwrap();
+        } catch {
+          // inventory có thể chưa có — không block UI
+        }
+      } else if (userProfile?.branchId && localStorage.getItem("jwt") && !branch) {
         try {
           await dispatch(
-            getBranchById({
-              id: userProfile.branchId,
-              jwt: localStorage.getItem("jwt"),
-            })
+            getBranchById({ id: userProfile.branchId, jwt: localStorage.getItem("jwt") })
           ).unwrap();
         } catch (error) {
-          console.error("Failed to fetch branch:", error);
           toast({
             title: "Error",
             description: "Failed to load branch information",
@@ -83,7 +81,7 @@ const ProductSection = ({ searchInputRef }) => {
       }
     };
 
-    fetchProducts();
+    fetchData();
   }, [dispatch, branch, userProfile, toast]);
 
   // Debounced search function
@@ -214,7 +212,7 @@ const ProductSection = ({ searchInputRef }) => {
               <ProductCard
                 key={product.id}
                 product={product}
-
+                stockQuantity={inventoryMap[product.id]}
               />
             ))}
           </div>
