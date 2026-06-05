@@ -2,17 +2,40 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
 import { FileText, Download, Filter, Calendar, RefreshCw } from "lucide-react";
 import {
   getMonthlySales,
-  getSalesByCategory
+  getSalesByCategory,
 } from "@/Redux Toolkit/features/storeAnalytics/storeAnalyticsThunks";
 import { useToast } from "@/components/ui/use-toast";
+import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
@@ -64,7 +87,9 @@ export default function Reports() {
   const dispatch = useDispatch();
   const { toast } = useToast();
   const { userProfile } = useSelector((state) => state.user);
-  const { monthlySales, salesByCategory, loading } = useSelector((state) => state.storeAnalytics);
+  const { monthlySales, salesByCategory, loading } = useSelector(
+    (state) => state.storeAnalytics,
+  );
 
   const [reportType, setReportType] = useState("all");
   const [dateRange, setDateRange] = useState("last30");
@@ -90,31 +115,26 @@ export default function Reports() {
     }
   };
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount || 0);
-  };
-
   // Prepare chart data
-  const salesData = monthlySales?.map(item => ({
-    name: new Date(item.date).toLocaleDateString('en-US', { month: 'short' }),
-    sales: item.totalAmount
-  })) || [];
+  const salesData =
+    monthlySales?.map((item) => ({
+      name: new Date(item.date).toLocaleDateString("en-US", { month: "short" }),
+      sales: item.totalAmount,
+    })) || [];
 
-  const categoryData = salesByCategory?.map(item => ({
-    name: item.categoryName,
-    value: item.totalSales
-  })) || [];
+  const categoryData =
+    salesByCategory?.map((item) => ({
+      name: item.categoryName,
+      value: item.totalSales,
+    })) || [];
 
   // Filter reports based on type
-  const filteredReports = reportType === "all"
-    ? reportData
-    : reportData.filter(report => report.type.toLowerCase() === reportType.toLowerCase());
+  const filteredReports =
+    reportType === "all"
+      ? reportData
+      : reportData.filter(
+          (report) => report.type.toLowerCase() === reportType.toLowerCase(),
+        );
 
   const salesConfig = {
     sales: {
@@ -134,10 +154,10 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Reports & Analytics</h1>
-
+        <h1 className="text-3xl font-bold tracking-tight">
+          Reports & Analytics
+        </h1>
       </div>
-
 
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -175,7 +195,10 @@ export default function Reports() {
                         <ChartTooltipContent
                           active={active}
                           payload={payload}
-                          formatter={(value) => [formatCurrency(value), "Sales"]}
+                          formatter={(value) => [
+                            formatCurrency(value),
+                            "Sales",
+                          ]}
                         />
                       )}
                     />
@@ -217,13 +240,18 @@ export default function Reports() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name}: ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
                     >
                       {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <ChartTooltip
@@ -231,7 +259,10 @@ export default function Reports() {
                         <ChartTooltipContent
                           active={active}
                           payload={payload}
-                          formatter={(value) => [formatCurrency(value), "Sales"]}
+                          formatter={(value) => [
+                            formatCurrency(value),
+                            "Sales",
+                          ]}
                         />
                       )}
                     />
@@ -251,8 +282,6 @@ export default function Reports() {
           </CardContent>
         </Card>
       </div>
-
-
     </div>
   );
 }

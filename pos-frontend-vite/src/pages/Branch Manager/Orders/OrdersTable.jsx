@@ -11,7 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, FileText, ArrowUpDown } from "lucide-react";
 
-const OrdersTable = ({ orders, loading, onViewDetails, onPrintInvoice, getStatusColor, getPaymentIcon }) => {
+const OrdersTable = ({
+  orders,
+  loading,
+  onViewDetails,
+  onPrintInvoice,
+  getStatusColor,
+  getPaymentIcon,
+}) => {
   return (
     <Table>
       <TableHeader>
@@ -54,15 +61,22 @@ const OrdersTable = ({ orders, loading, onViewDetails, onPrintInvoice, getStatus
               <TableCell className="font-medium">{order.id}</TableCell>
               <TableCell>{order.customer?.fullName || "-"}</TableCell>
               <TableCell>{order.cashierId || "-"}</TableCell>
-              <TableCell>{order.createdAt ? order.createdAt.slice(0, 10) : "-"}</TableCell>
-              <TableCell>{order.totalAmount ? `$${order.totalAmount}` : "-"}</TableCell>
+              <TableCell>
+                {order.createdAt ? order.createdAt.slice(0, 10) : "-"}
+              </TableCell>
+              <TableCell>
+                {order.totalAmount ? `$${order.totalAmount}` : "-"}
+              </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   {getPaymentIcon(order.paymentType)} {order.paymentType || "-"}
                 </div>
               </TableCell>
               <TableCell>
-                <Badge className={getStatusColor(order.status)} variant="secondary">
+                <Badge
+                  className={getStatusColor(order.status)}
+                  variant="secondary"
+                >
                   {order.status || "COMPLETE"}
                 </Badge>
               </TableCell>
@@ -100,4 +114,4 @@ const OrdersTable = ({ orders, loading, onViewDetails, onPrintInvoice, getStatus
   );
 };
 
-export default OrdersTable; 
+export default OrdersTable;

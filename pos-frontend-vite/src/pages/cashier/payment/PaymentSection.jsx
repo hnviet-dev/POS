@@ -9,6 +9,7 @@ import {
 } from "../../../Redux Toolkit/features/cart/cartSlice";
 import { Button } from "../../../components/ui/button";
 import { CreditCard, Pause, AlertCircle } from "lucide-react";
+import { fmtVND } from "@/utils/formatCurrency";
 
 const PaymentSection = ({ setShowPaymentDialog }) => {
   const cartItems = useSelector(selectCartItems);
@@ -49,7 +50,7 @@ const PaymentSection = ({ setShowPaymentDialog }) => {
       <div className="rounded-xl bg-primary/5 border border-primary/10 p-3 text-center">
         <p className="text-xs text-muted-foreground mb-0.5">Tổng thanh toán</p>
         <p className="text-2xl font-bold text-primary tabular-nums">
-          {total.toLocaleString("vi-VN")}₫
+          {fmtVND(total)}
         </p>
       </div>
 

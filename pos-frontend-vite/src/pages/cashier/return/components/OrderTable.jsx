@@ -14,11 +14,7 @@ import { formatDate } from "../../order/data";
 import { useSelector } from "react-redux";
 
 const OrderTable = ({ handleSelectOrder }) => {
-  const {
-    orders,
-    loading,
-    error
-  } = useSelector((state) => state.order);
+  const { orders, loading, error } = useSelector((state) => state.order);
   return (
     <div className="w-full p-4 flex flex-col">
       <div className="flex-1 overflow-auto">

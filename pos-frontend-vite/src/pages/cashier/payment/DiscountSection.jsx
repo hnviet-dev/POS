@@ -8,6 +8,7 @@ import {
 } from "../../../Redux Toolkit/features/cart/cartSlice";
 import { Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { fmtVND } from "@/utils/formatCurrency";
 
 const DiscountSection = () => {
   const dispatch = useDispatch();
@@ -57,7 +58,7 @@ const DiscountSection = () => {
           }`}
           onClick={() => handleSetType("fixed")}
         >
-          Số tiền (₫)
+          Số tiền ($)
         </button>
       </div>
 
@@ -73,14 +74,14 @@ const DiscountSection = () => {
           className="pr-10"
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
-          {discount.type === "percentage" ? "%" : "₫"}
+          {discount.type === "percentage" ? "%" : "$"}
         </span>
       </div>
 
       {/* Preview số tiền giảm */}
       {discountAmount > 0 && (
         <p className="mt-2 text-xs text-emerald-600 font-medium text-right">
-          Tiết kiệm: {discountAmount.toLocaleString("vi-VN")}₫
+          Tiết kiệm: {fmtVND(discountAmount)}
         </p>
       )}
     </div>

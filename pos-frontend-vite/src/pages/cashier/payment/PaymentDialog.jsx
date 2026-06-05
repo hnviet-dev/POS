@@ -33,9 +33,7 @@ import {
   FileText,
   ChevronRight,
 } from "lucide-react";
-
-const fmtVND = (amount) =>
-  (amount || 0).toLocaleString("vi-VN") + "₫";
+import { fmtVND } from "@/utils/formatCurrency";
 
 const PaymentDialog = ({
   showPaymentDialog,

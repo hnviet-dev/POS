@@ -1,144 +1,149 @@
-import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useToast } from '@/components/ui/use-toast'
-import { 
-  Eye, 
-  EyeOff, 
-  Mail, 
-  Lock, 
-  ShoppingCart, 
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  ShoppingCart,
   ArrowLeft,
-  CheckCircle
-} from 'lucide-react'
-import { Link, useNavigate } from 'react-router'
-import { useDispatch, useSelector } from 'react-redux'
-import { login } from '@/Redux Toolkit/features/auth/authThunk'
-import { getUserProfile } from '../../../Redux Toolkit/features/user/userThunks'
-import { startShift } from '../../../Redux Toolkit/features/shiftReport/shiftReportThunks'
-import { ThemeToggle } from '../../../components/theme-toggle'
-import { forgotPassword } from '../../../Redux Toolkit/features/auth/authThunk'
+  CheckCircle,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "@/Redux Toolkit/features/auth/authThunk";
+import { getUserProfile } from "../../../Redux Toolkit/features/user/userThunks";
+import { startShift } from "../../../Redux Toolkit/features/shiftReport/shiftReportThunks";
+import { ThemeToggle } from "../../../components/theme-toggle";
+import { forgotPassword } from "../../../Redux Toolkit/features/auth/authThunk";
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [showForgotPassword, setShowForgotPassword] = useState(false)
-  const [emailSent, setEmailSent] = useState(false)
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  })
+    email: "",
+    password: "",
+  });
 
-  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotEmail, setForgotEmail] = useState("");
 
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const { toast } = useToast()
-  const { error, loading } = useSelector((state) => state.auth)
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { error, loading } = useSelector((state) => state.auth);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleLogin = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
     try {
-      const resultAction = await dispatch(login(formData))
+      const resultAction = await dispatch(login(formData));
       if (login.fulfilled.match(resultAction)) {
         toast({
           title: "Success",
           description: "Login successful!",
-        })
+        });
 
-        const user=resultAction.payload.user;
+        const user = resultAction.payload.user;
 
-        console.log('Login success:', resultAction.payload.user.role)
+        console.log("Login success:", resultAction.payload.user.role);
 
         // Redirect based on user role
-        const userRole = user.role
-        if (userRole === 'ROLE_BRANCH_CASHIER') {
-          navigate('/cashier')
+        const userRole = user.role;
+        if (userRole === "ROLE_BRANCH_CASHIER") {
+          navigate("/cashier");
           // Lấy profile trước để có branchId chính xác
-          const profileAction = await dispatch(getUserProfile(resultAction.payload.jwt));
+          const profileAction = await dispatch(
+            getUserProfile(resultAction.payload.jwt),
+          );
           if (getUserProfile.fulfilled.match(profileAction)) {
             const branchId = profileAction.payload?.branchId;
             if (branchId) {
-              dispatch(startShift(branchId))
+              dispatch(startShift(branchId));
             } else {
-              console.warn('⚠️ Cashier has no branchId — skipping startShift');
+              console.warn("⚠️ Cashier has no branchId — skipping startShift");
             }
           }
-        } else if (userRole === 'ROLE_STORE_ADMIN' || userRole === 'ROLE_STORE_MANAGER') {
+        } else if (
+          userRole === "ROLE_STORE_ADMIN" ||
+          userRole === "ROLE_STORE_MANAGER"
+        ) {
           dispatch(getUserProfile(resultAction.payload.jwt));
-          navigate('/store')
-        } else if (userRole === 'ROLE_BRANCH_MANAGER' || userRole === 'ROLE_BRANCH_ADMIN') {
+          navigate("/store");
+        } else if (
+          userRole === "ROLE_BRANCH_MANAGER" ||
+          userRole === "ROLE_BRANCH_ADMIN"
+        ) {
           dispatch(getUserProfile(resultAction.payload.jwt));
-          navigate('/branch')
+          navigate("/branch");
         } else {
           // Unknown role, redirect to landing page
-          navigate('/')
+          navigate("/");
         }
       } else {
         toast({
           title: "Error",
-          description: resultAction.payload || 'Login failed',
+          description: resultAction.payload || "Login failed",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message || 'Login failed',
+        description: error.message || "Login failed",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleForgotPassword = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      const resultAction = await dispatch(forgotPassword(forgotEmail))
-       if (forgotPassword.fulfilled.match(resultAction)) {
+      const resultAction = await dispatch(forgotPassword(forgotEmail));
+      if (forgotPassword.fulfilled.match(resultAction)) {
         toast({
           title: "Success",
           description: "Password reset email sent!",
-        })
-      }else{
-        console.log("error", error)
+        });
+      } else {
+        console.log("error", error);
         toast({
-        title: "Error",
-        description: error || 'Failed to send reset email',
-        variant: "destructive",
-      })
+          title: "Error",
+          description: error || "Failed to send reset email",
+          variant: "destructive",
+        });
       }
     } catch (error) {
-      console.log("error", error)
+      console.log("error", error);
       toast({
         title: "Error",
-        description: error || 'Failed to send reset email',
+        description: error || "Failed to send reset email",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-
-    
-    
-  }
+  };
 
   const resetForgotPassword = () => {
-    setShowForgotPassword(false)
-    setEmailSent(false)
-    setForgotEmail('')
-  }
+    setShowForgotPassword(false);
+    setEmailSent(false);
+    setForgotEmail("");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center p-4 relative">
@@ -146,11 +151,10 @@ const Login = () => {
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
-      
+
       <div className="w-full max-w-md">
         {/* Logo and Back Button */}
         <div className="text-center mb-8">
-         
           <div className="flex items-center justify-center space-x-2 mb-4">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-6 h-6 text-primary-foreground" />
@@ -158,13 +162,12 @@ const Login = () => {
             <span className="text-2xl font-bold text-foreground">POS Pro</span>
           </div>
           <h1 className="text-2xl font-bold text-foreground">
-            {showForgotPassword ? 'Reset Password' : 'Welcome Back'}
+            {showForgotPassword ? "Reset Password" : "Welcome Back"}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {showForgotPassword 
-              ? 'Enter your email to receive reset instructions'
-              : 'Sign in to your account to continue'
-            }
+            {showForgotPassword
+              ? "Enter your email to receive reset instructions"
+              : "Sign in to your account to continue"}
           </p>
         </div>
 
@@ -174,7 +177,10 @@ const Login = () => {
             <form onSubmit={handleLogin} className="space-y-6">
               {/* Email Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-foreground mb-2"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -196,7 +202,10 @@ const Login = () => {
 
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-foreground mb-2"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -236,7 +245,10 @@ const Login = () => {
                     type="checkbox"
                     className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-foreground">
+                  <label
+                    htmlFor="remember-me"
+                    className="ml-2 block text-sm text-foreground"
+                  >
                     Remember me
                   </label>
                 </div>
@@ -261,7 +273,7 @@ const Login = () => {
                     Signing in...
                   </div>
                 ) : (
-                  'Sign In'
+                  "Sign In"
                 )}
               </Button>
             </form>
@@ -273,19 +285,21 @@ const Login = () => {
                   <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-card text-muted-foreground">Or continue with</span>
+                  <span className="px-2 bg-card text-muted-foreground">
+                    Or continue with
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Demo Account Info */}
-            <div className="mt-6 p-4 bg-muted rounded-lg">
+            {/* <div className="mt-6 p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground text-center">
                 <strong>Demo Account:</strong><br />
                 Email: demo@pospro.com<br />
                 Password: demo123
               </p>
-            </div>
+            </div> */}
           </div>
         )}
 
@@ -294,7 +308,10 @@ const Login = () => {
           <div className="bg-card rounded-2xl shadow-xl p-8">
             <form onSubmit={handleForgotPassword} className="space-y-6">
               <div>
-                <label htmlFor="forgot-email" className="block text-sm font-medium text-foreground mb-2">
+                <label
+                  htmlFor="forgot-email"
+                  className="block text-sm font-medium text-foreground mb-2"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -322,18 +339,14 @@ const Login = () => {
                 >
                   Back to Login
                 </Button>
-                <Button
-                  type="submit"
-                  className="flex-1"
-                  disabled={loading}
-                >
+                <Button type="submit" className="flex-1" disabled={loading}>
                   {loading ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2"></div>
                       Sending...
                     </div>
                   ) : (
-                    'Send Reset Link'
+                    "Send Reset Link"
                   )}
                 </Button>
               </div>
@@ -351,17 +364,15 @@ const Login = () => {
               Check Your Email
             </h3>
             <p className="text-muted-foreground mb-6">
-              We've sent password reset instructions to <strong>{forgotEmail}</strong>
+              We've sent password reset instructions to{" "}
+              <strong>{forgotEmail}</strong>
             </p>
             <div className="space-y-3">
-              <Button
-                onClick={resetForgotPassword}
-                className="w-full"
-              >
+              <Button onClick={resetForgotPassword} className="w-full">
                 Back to Login
               </Button>
               <p className="text-sm text-muted-foreground">
-                Didn't receive the email? Check your spam folder or{' '}
+                Didn't receive the email? Check your spam folder or{" "}
                 <button
                   onClick={() => setEmailSent(false)}
                   className="text-primary hover:text-primary/80"
@@ -374,7 +385,7 @@ const Login = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

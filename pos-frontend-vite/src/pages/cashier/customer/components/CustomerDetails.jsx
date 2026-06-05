@@ -1,8 +1,8 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StarIcon, PlusIcon, Loader2, UserIcon } from 'lucide-react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { StarIcon, PlusIcon, Loader2, UserIcon } from "lucide-react";
 
 const CustomerDetails = ({ customer, onAddPoints, loading = false }) => {
   if (!customer) {
@@ -27,9 +27,11 @@ const CustomerDetails = ({ customer, onAddPoints, loading = false }) => {
     <div className="p-4">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-2xl font-bold">{customer.fullName || 'Unknown Customer'}</h2>
-          <p className="text-muted-foreground">{customer.phone || 'N/A'}</p>
-          <p className="text-muted-foreground">{customer.email || 'N/A'}</p>
+          <h2 className="text-2xl font-bold">
+            {customer.fullName || "Unknown Customer"}
+          </h2>
+          <p className="text-muted-foreground">{customer.phone || "N/A"}</p>
+          <p className="text-muted-foreground">{customer.email || "N/A"}</p>
         </div>
         <Button onClick={onAddPoints} className="flex items-center gap-2">
           <PlusIcon className="h-4 w-4" />
@@ -47,7 +49,9 @@ const CustomerDetails = ({ customer, onAddPoints, loading = false }) => {
           <CardContent>
             <div className="flex items-center gap-2">
               <StarIcon className="h-5 w-5 text-yellow-500" />
-              <span className="text-2xl font-bold">{customer.loyaltyPoints || 0}</span>
+              <span className="text-2xl font-bold">
+                {customer.loyaltyPoints || 0}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -59,7 +63,9 @@ const CustomerDetails = ({ customer, onAddPoints, loading = false }) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{customer.totalOrders || 0}</span>
+            <span className="text-2xl font-bold">
+              {customer.totalOrders || 0}
+            </span>
           </CardContent>
         </Card>
 
@@ -70,7 +76,9 @@ const CustomerDetails = ({ customer, onAddPoints, loading = false }) => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">${(customer.totalSpent || 0).toFixed(2)}</span>
+            <span className="text-2xl font-bold">
+              ${(customer.totalSpent || 0).toFixed(2)}
+            </span>
           </CardContent>
         </Card>
       </div>
@@ -81,7 +89,9 @@ const CustomerDetails = ({ customer, onAddPoints, loading = false }) => {
             <CardTitle>Average Order Value</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">${customer.averageOrderValue.toFixed(2)}</span>
+            <span className="text-2xl font-bold">
+              ${customer.averageOrderValue.toFixed(2)}
+            </span>
           </CardContent>
         </Card>
       )}
@@ -97,4 +107,4 @@ const CustomerDetails = ({ customer, onAddPoints, loading = false }) => {
   );
 };
 
-export default CustomerDetails; 
+export default CustomerDetails;

@@ -2,7 +2,11 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { getDailySalesChart } from "@/Redux Toolkit/features/branchAnalytics/branchAnalyticsThunks";
 
 const SalesChart = () => {
@@ -16,13 +20,12 @@ const SalesChart = () => {
     }
   }, [branchId, dispatch]);
 
-
-
   // Map API data to recharts format
-  const data = analytics?.dailySales?.map((item) => ({
-    name: item.date,
-    sales: item.totalSales,
-  })) || [];
+  const data =
+    analytics?.dailySales?.map((item) => ({
+      name: item.date,
+      sales: item.totalSales,
+    })) || [];
 
   const config = {
     sales: {
@@ -72,7 +75,11 @@ const SalesChart = () => {
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
-        {analytics?.loading && <div className="text-center text-xs text-gray-400 mt-2">Loading...</div>}
+        {analytics?.loading && (
+          <div className="text-center text-xs text-gray-400 mt-2">
+            Loading...
+          </div>
+        )}
       </CardContent>
     </Card>
   );

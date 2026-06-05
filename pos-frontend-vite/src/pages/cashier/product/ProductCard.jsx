@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useToast } from "../../../components/ui/use-toast";
 import { addToCart, selectCartItems } from "../../../Redux Toolkit/features/cart/cartSlice";
 import { Plus, Package } from "lucide-react";
+import { fmtVND } from "@/utils/formatCurrency";
 
 // stockQuantity:
 //   undefined  → chưa nhập kho tại branch
@@ -132,7 +133,7 @@ const ProductCard = ({ product, stockQuantity }) => {
 
         {/* Giá */}
         <p className={`text-sm font-bold mt-1 ${isUnavailable ? "text-muted-foreground" : "text-primary"}`}>
-          {(product.sellingPrice || product.price || 0).toLocaleString("vi-VN")}₫
+          {fmtVND(product.sellingPrice || product.price || 0)}
         </p>
       </div>
     </div>

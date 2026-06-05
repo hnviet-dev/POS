@@ -1,6 +1,7 @@
 import { Button } from "../../../components/ui/button";
 import { Minus, Plus, X, Package } from "lucide-react";
 import { useSelector } from "react-redux";
+import { fmtVND } from "@/utils/formatCurrency";
 
 const CartItem = ({ item, updateCartItemQuantity, removeFromCart }) => {
   const inventories = useSelector((state) => state.inventory.inventories);
@@ -28,7 +29,7 @@ const CartItem = ({ item, updateCartItemQuantity, removeFromCart }) => {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium leading-tight truncate text-foreground">{item.name}</p>
         <div className="flex items-center gap-1 mt-0.5">
-          <span className="text-xs text-muted-foreground">{price.toLocaleString("vi-VN")}₫</span>
+          <span className="text-xs text-muted-foreground">{fmtVND(price)}</span>
           {atStockLimit && (
             <span className="text-[10px] text-amber-600 font-medium">· tối đa {stockQuantity}</span>
           )}
@@ -65,7 +66,7 @@ const CartItem = ({ item, updateCartItemQuantity, removeFromCart }) => {
       {/* Tổng tiền dòng */}
       <div className="w-20 text-right flex-shrink-0">
         <p className="text-sm font-bold text-primary tabular-nums">
-          {lineTotal.toLocaleString("vi-VN")}₫
+          {fmtVND(lineTotal)}
         </p>
       </div>
 

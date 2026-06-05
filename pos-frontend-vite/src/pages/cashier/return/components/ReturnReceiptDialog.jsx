@@ -8,7 +8,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PrinterIcon } from "lucide-react";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 
 const ReturnReceiptDialog = ({
   showReceiptDialog,
@@ -64,18 +71,25 @@ const ReturnReceiptDialog = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {selectedOrder.items
-
-              .map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="py-2">{item.product?.name.slice(0, 20) + "..."}</TableCell>
-                  <TableCell className="text-center py-2">{item.returnQuantity}</TableCell>
-                  <TableCell className="text-right py-2">${item.product?.sellingPrice?.toFixed(2)}</TableCell>
-                  <TableCell className="text-right py-2">
-                    ${(item.product.sellingPrice * item.returnQuantity)?.toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              ))}
+            {selectedOrder.items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="py-2">
+                  {item.product?.name.slice(0, 20) + "..."}
+                </TableCell>
+                <TableCell className="text-center py-2">
+                  {item.returnQuantity}
+                </TableCell>
+                <TableCell className="text-right py-2">
+                  ${item.product?.sellingPrice?.toFixed(2)}
+                </TableCell>
+                <TableCell className="text-right py-2">
+                  $
+                  {(item.product.sellingPrice * item.returnQuantity)?.toFixed(
+                    2,
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
         <div className="space-y-1 text-sm mb-4">
@@ -85,9 +99,7 @@ const ReturnReceiptDialog = ({
           </div>
           <div className="flex justify-between pt-1">
             <span>Refund Method</span>
-            <span>
-              {selectedOrder.paymentType}
-            </span>
+            <span>{selectedOrder.paymentType}</span>
           </div>
           <div className="flex justify-between pt-1">
             <span>Return Reason</span>
@@ -103,7 +115,7 @@ const ReturnReceiptDialog = ({
         </div>
       </div>
       <DialogFooter>
-        <Button variant="outline" className="gap-2" >
+        <Button variant="outline" className="gap-2">
           <PrinterIcon className="h-4 w-4" />
           Print & Complete
         </Button>

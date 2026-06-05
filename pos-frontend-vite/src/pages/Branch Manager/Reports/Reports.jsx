@@ -3,27 +3,46 @@ import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Download, FileText, BarChart2, TrendingUp, Users } from "lucide-react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, PieChart as RPieChart, Pie, Cell } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import {
+  Calendar,
+  Download,
+  FileText,
+  BarChart2,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  PieChart as RPieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
 import {
   getDailySalesChart,
   getPaymentBreakdown,
   getCategoryWiseSalesBreakdown,
   getTopCashiersByRevenue,
 } from "@/Redux Toolkit/features/branchAnalytics/branchAnalyticsThunks";
+import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
 const Reports = () => {
   const dispatch = useDispatch();
   const branchId = useSelector((state) => state.branch.branch?.id);
-  const {
-    dailySales,
-    paymentBreakdown,
-    categorySales,
-    topCashiers,
-  } = useSelector((state) => state.branchAnalytics);
+  const { dailySales, paymentBreakdown, categorySales, topCashiers } =
+    useSelector((state) => state.branchAnalytics);
 
   useEffect(() => {
     if (branchId) {
@@ -36,41 +55,47 @@ const Reports = () => {
   }, [branchId, dispatch]);
 
   // Map API data to recharts format
-  const salesData = dailySales?.map((item) => ({
-    date: item.date,
-    sales: item.totalSales,
-  })) || [];
+  const salesData =
+    dailySales?.map((item) => ({
+      date: item.date,
+      sales: item.totalSales,
+    })) || [];
 
-  const paymentData = paymentBreakdown?.map((item) => ({
-    name: item.type,
-    value: item.percentage,
-  })) || [];
+  const paymentData =
+    paymentBreakdown?.map((item) => ({
+      name: item.type,
+      value: item.percentage,
+    })) || [];
 
-  const paymentConfig = paymentBreakdown?.reduce((acc, item, idx) => {
-    acc[item.type] = {
-      label: item.type,
-      color: COLORS[idx % COLORS.length],
-    };
-    return acc;
-  }, {}) || {};
+  const paymentConfig =
+    paymentBreakdown?.reduce((acc, item, idx) => {
+      acc[item.type] = {
+        label: item.type,
+        color: COLORS[idx % COLORS.length],
+      };
+      return acc;
+    }, {}) || {};
 
-  const categoryData = categorySales?.map((item) => ({
-    name: item.categoryName,
-    value: item.totalSales,
-  })) || [];
+  const categoryData =
+    categorySales?.map((item) => ({
+      name: item.categoryName,
+      value: item.totalSales,
+    })) || [];
 
-  const categoryConfig = categorySales?.reduce((acc, item, idx) => {
-    acc[item.categoryName] = {
-      label: item.categoryName,
-      color: COLORS[idx % COLORS.length],
-    };
-    return acc;
-  }, {}) || {};
+  const categoryConfig =
+    categorySales?.reduce((acc, item, idx) => {
+      acc[item.categoryName] = {
+        label: item.categoryName,
+        color: COLORS[idx % COLORS.length],
+      };
+      return acc;
+    }, {}) || {};
 
-  const cashierData = topCashiers?.map((item) => ({
-    name: item.cashierName,
-    sales: item.totalRevenue,
-  })) || [];
+  const cashierData =
+    topCashiers?.map((item) => ({
+      name: item.cashierName,
+      sales: item.totalRevenue,
+    })) || [];
 
   const cashierConfig = {
     sales: {
@@ -86,15 +111,6 @@ const Reports = () => {
     },
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
   const handleExport = (type, format) => {
     console.log(`Exporting ${type} report in ${format} format`);
     // Implement export functionality
@@ -103,7 +119,9 @@ const Reports = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Reports & Analytics</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Reports & Analytics
+        </h1>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
             <Calendar className="h-4 w-4 mr-1" />
@@ -145,7 +163,12 @@ const Reports = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Daily Sales Trend</CardTitle>
-                  <Button variant="outline" size="sm" className="gap-2" onClick={() => handleExport('sales', 'excel')}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => handleExport("sales", "excel")}
+                  >
                     <Download className="h-4 w-4" />
                     Export
                   </Button>
@@ -194,7 +217,12 @@ const Reports = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Payment Methods</CardTitle>
-                  <Button variant="outline" size="sm" className="gap-2" onClick={() => handleExport('payments', 'excel')}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => handleExport("payments", "excel")}
+                  >
                     <Download className="h-4 w-4" />
                     Export
                   </Button>
@@ -209,13 +237,18 @@ const Reports = () => {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
                       >
                         {paymentData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
                         ))}
                       </Pie>
                       <ChartTooltip
@@ -246,7 +279,12 @@ const Reports = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Sales Performance</CardTitle>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => handleExport('sales', 'excel')}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => handleExport("sales", "excel")}
+                >
                   <Download className="h-4 w-4" />
                   Export
                 </Button>
@@ -298,7 +336,12 @@ const Reports = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Product Category Performance</CardTitle>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => handleExport('products', 'excel')}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => handleExport("products", "excel")}
+                >
                   <Download className="h-4 w-4" />
                   Export
                 </Button>
@@ -314,13 +357,18 @@ const Reports = () => {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
+                        }
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
                       >
                         {categoryData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
                         ))}
                       </Pie>
                       <ChartTooltip
@@ -328,7 +376,10 @@ const Reports = () => {
                           <ChartTooltipContent
                             active={active}
                             payload={payload}
-                            formatter={(value) => [`${value}%`, "Sales Percentage"]}
+                            formatter={(value) => [
+                              `${value}%`,
+                              "Sales Percentage",
+                            ]}
                           />
                         )}
                       />
@@ -346,12 +397,18 @@ const Reports = () => {
                     <div key={index} className="rounded-lg bg-gray-50 p-4">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm font-medium text-gray-500">{category.name}</p>
-                          <p className="text-2xl font-bold">{formatCurrency(category.value)}</p>
+                          <p className="text-sm font-medium text-gray-500">
+                            {category.name}
+                          </p>
+                          <p className="text-2xl font-bold">
+                            {formatCurrency(category.value)}
+                          </p>
                         </div>
                         <div
                           className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          style={{
+                            backgroundColor: COLORS[index % COLORS.length],
+                          }}
                         />
                       </div>
                     </div>
@@ -368,7 +425,12 @@ const Reports = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Cashier Performance</CardTitle>
-                <Button variant="outline" size="sm" className="gap-2" onClick={() => handleExport('cashier', 'excel')}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => handleExport("cashier", "excel")}
+                >
                   <Download className="h-4 w-4" />
                   Export
                 </Button>
@@ -377,7 +439,11 @@ const Reports = () => {
             <CardContent>
               <ChartContainer config={cashierConfig}>
                 <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={cashierData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <BarChart
+                    data={cashierData}
+                    layout="vertical"
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
                     <XAxis
                       type="number"
                       stroke="#888888"
@@ -399,7 +465,10 @@ const Reports = () => {
                         <ChartTooltipContent
                           active={active}
                           payload={payload}
-                          formatter={(value) => [`$${value.toLocaleString('en-IN')}`, 'Sales']}
+                          formatter={(value) => [
+                            `$${value.toLocaleString("en-IN")}`,
+                            "Sales",
+                          ]}
                         />
                       )}
                     />

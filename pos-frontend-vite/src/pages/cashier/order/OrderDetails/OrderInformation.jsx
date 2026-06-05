@@ -1,7 +1,11 @@
-import React from 'react'
-import { Card, CardContent } from '../../../../components/ui/card'
-import { formatDate, getPaymentModeLabel, getStatusBadgeVariant } from '../data'
-import { Badge } from '../../../../components/ui/badge'
+import React from "react";
+import { Card, CardContent } from "../../../../components/ui/card";
+import {
+  formatDate,
+  getPaymentModeLabel,
+  getStatusBadgeVariant,
+} from "../data";
+import { Badge } from "../../../../components/ui/badge";
 
 const OrderInformation = ({ selectedOrder }) => {
   return (
@@ -27,7 +31,7 @@ const OrderInformation = ({ selectedOrder }) => {
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default OrderInformation
+export default OrderInformation;

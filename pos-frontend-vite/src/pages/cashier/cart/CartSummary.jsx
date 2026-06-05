@@ -7,8 +7,7 @@ import {
   selectTax,
   selectTotal,
 } from "../../../Redux Toolkit/features/cart/cartSlice";
-
-const fmtVND = (n) => (n || 0).toLocaleString("vi-VN") + "₫";
+import { fmtVND } from "@/utils/formatCurrency";
 
 const CartSummary = () => {
   const subtotal = useSelector(selectSubtotal);

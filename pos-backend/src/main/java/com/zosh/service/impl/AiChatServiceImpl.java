@@ -304,11 +304,11 @@ public class AiChatServiceImpl implements AiChatService {
 
     private String formatCurrency(Double amount) {
         if (amount == null)
-            return "0 ₫";
-        return String.format("%,.0f ₫", amount);
+            return "$0";
+        return String.format("$%,.0f", amount);
     }
 
     private String formatCurrency(double amount) {
-        return String.format("%,.0f ₫", amount);
+        return String.format("$%,.0f", amount);
     }
 }

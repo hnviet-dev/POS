@@ -1,6 +1,13 @@
 import { formatDate, getPaymentModeLabel } from "../data";
 import { styles } from "./pdfStyles";
-import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+} from "@react-pdf/renderer";
 
 // Create PDF document
 export const OrderPDF = ({ order }) => (
@@ -52,7 +59,6 @@ export const OrderPDF = ({ order }) => (
               {order.customer?.email || "Walk-in Customer"}
             </Text>
           </View>
-
         </View>
       </View>
 
@@ -74,15 +80,18 @@ export const OrderPDF = ({ order }) => (
                 ) : (
                   <View style={styles.imagePlaceholder}>
                     <Text style={styles.placeholderText}>
-                      {item.productName ? item.productName.charAt(0).toUpperCase() :
-                        item.product?.name ? item.product.name.charAt(0).toUpperCase() : 'P'}
+                      {item.productName
+                        ? item.productName.charAt(0).toUpperCase()
+                        : item.product?.name
+                          ? item.product.name.charAt(0).toUpperCase()
+                          : "P"}
                     </Text>
                   </View>
                 )}
               </View>
               <View style={styles.tableCell}>
                 <Text style={styles.productName}>
-                  {item.productName || item.product?.name || 'Product'}
+                  {item.productName || item.product?.name || "Product"}
                 </Text>
                 {item.product?.sku && (
                   <Text style={styles.productSku}>SKU: {item.product.sku}</Text>
@@ -93,7 +102,9 @@ export const OrderPDF = ({ order }) => (
                 ${item.product?.sellingPrice?.toFixed(2) || "0.00"}
               </Text>
               <Text style={styles.tableCellRight}>
-                ${(item.product?.sellingPrice * item.quantity)?.toFixed(2) || "0.00"}
+                $
+                {(item.product?.sellingPrice * item.quantity)?.toFixed(2) ||
+                  "0.00"}
               </Text>
             </View>
           ))}

@@ -22,12 +22,13 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
 
 const SalesTrend = () => {
   const dispatch = useDispatch();
   const { toast } = useToast();
   const { salesTrends, dailySales, loading } = useSelector(
-    (state) => state.storeAnalytics
+    (state) => state.storeAnalytics,
   );
   const { userProfile } = useSelector((state) => state.user);
   const [period, setPeriod] = useState("daily");
@@ -44,7 +45,7 @@ const SalesTrend = () => {
         await dispatch(getDailySales(userProfile.id)).unwrap();
       } else {
         await dispatch(
-          getSalesTrends({ storeAdminId: userProfile.id, period })
+          getSalesTrends({ storeAdminId: userProfile.id, period }),
         ).unwrap();
       }
     } catch (err) {
@@ -54,16 +55,6 @@ const SalesTrend = () => {
         variant: "destructive",
       });
     }
-  };
-
-  // Format currency for tooltip
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
   };
 
   // Get chart data based on period

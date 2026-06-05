@@ -2,31 +2,70 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Search, Filter, Calendar, Download, Plus, Edit, Trash2, CreditCard, DollarSign, User, Store } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Search,
+  Filter,
+  Calendar,
+  Download,
+  Plus,
+  Edit,
+  Trash2,
+  CreditCard,
+  DollarSign,
+  User,
+  Store,
+} from "lucide-react";
 import {
   getStoreOverview,
   getDailySales,
-  getSalesByPaymentMethod
+  getSalesByPaymentMethod,
 } from "@/Redux Toolkit/features/storeAnalytics/storeAnalyticsThunks";
 import { useToast } from "@/components/ui/use-toast";
+import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
 
 export default function Sales() {
   const dispatch = useDispatch();
   const { toast } = useToast();
   const { userProfile } = useSelector((state) => state.user);
-  const {
-    storeOverview,
-    dailySales,
-    salesByPaymentMethod,
-    loading
-  } = useSelector((state) => state.storeAnalytics);
-
+  const { storeOverview, dailySales, salesByPaymentMethod, loading } =
+    useSelector((state) => state.storeAnalytics);
 
   useEffect(() => {
     if (userProfile?.id) {
@@ -50,16 +89,6 @@ export default function Sales() {
     }
   };
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount || 0);
-  };
-
   // Format percentage change
   const formatChange = (current, previous) => {
     if (!previous || previous === 0) return "+0%";
@@ -69,15 +98,20 @@ export default function Sales() {
   };
 
   // Prepare chart data
-  const dailySalesData = dailySales?.map(item => ({
-    date: new Date(item.date)?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    sales: item.totalAmount
-  })) || [];
+  const dailySalesData =
+    dailySales?.map((item) => ({
+      date: new Date(item.date)?.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      sales: item.totalAmount,
+    })) || [];
 
-  const paymentMethodData = salesByPaymentMethod?.map(item => ({
-    name: item.paymentMethod,
-    value: item.totalAmount
-  })) || [];
+  const paymentMethodData =
+    salesByPaymentMethod?.map((item) => ({
+      name: item.paymentMethod,
+      value: item.totalAmount,
+    })) || [];
 
   const salesConfig = {
     sales: {
@@ -93,7 +127,7 @@ export default function Sales() {
     },
   };
 
-  console.log("sales daily", dailySales)
+  console.log("sales daily", dailySales);
 
   return (
     <div className="space-y-6">
@@ -122,8 +156,12 @@ export default function Sales() {
                   {loading ? (
                     <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
                   ) : (
-                    formatChange(storeOverview?.totalSales, storeOverview?.previousPeriodSales)
-                  )} from last week
+                    formatChange(
+                      storeOverview?.totalSales,
+                      storeOverview?.previousPeriodSales,
+                    )
+                  )}{" "}
+                  from last week
                 </p>
               </div>
               <div className="p-3 bg-emerald-100 rounded-full">
@@ -137,7 +175,9 @@ export default function Sales() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Orders Today</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Orders Today
+                </p>
                 <h3 className="text-2xl font-bold mt-1">
                   {loading ? (
                     <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
@@ -149,8 +189,12 @@ export default function Sales() {
                   {loading ? (
                     <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
                   ) : (
-                    formatChange(storeOverview?.todayOrders, storeOverview?.yesterdayOrders)
-                  )} from yesterday
+                    formatChange(
+                      storeOverview?.todayOrders,
+                      storeOverview?.yesterdayOrders,
+                    )
+                  )}{" "}
+                  from yesterday
                 </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
@@ -164,7 +208,9 @@ export default function Sales() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Active Cashiers</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Active Cashiers
+                </p>
                 <h3 className="text-2xl font-bold mt-1">
                   {loading ? (
                     <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
@@ -191,7 +237,9 @@ export default function Sales() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Avg. Order Value</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Avg. Order Value
+                </p>
                 <h3 className="text-2xl font-bold mt-1">
                   {loading ? (
                     <div className="h-8 w-20 bg-gray-200 rounded animate-pulse"></div>
@@ -203,8 +251,12 @@ export default function Sales() {
                   {loading ? (
                     <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
                   ) : (
-                    formatChange(storeOverview?.averageOrderValue, storeOverview?.previousPeriodAverageOrderValue)
-                  )} from last week
+                    formatChange(
+                      storeOverview?.averageOrderValue,
+                      storeOverview?.previousPeriodAverageOrderValue,
+                    )
+                  )}{" "}
+                  from last week
                 </p>
               </div>
               <div className="p-3 bg-orange-100 rounded-full">
@@ -252,7 +304,10 @@ export default function Sales() {
                         <ChartTooltipContent
                           active={active}
                           payload={payload}
-                          formatter={(value) => [formatCurrency(value), "Sales"]}
+                          formatter={(value) => [
+                            formatCurrency(value),
+                            "Sales",
+                          ]}
                         />
                       )}
                     />
@@ -310,7 +365,10 @@ export default function Sales() {
                         <ChartTooltipContent
                           active={active}
                           payload={payload}
-                          formatter={(value) => [formatCurrency(value), "Amount"]}
+                          formatter={(value) => [
+                            formatCurrency(value),
+                            "Amount",
+                          ]}
                         />
                       )}
                     />
@@ -331,8 +389,6 @@ export default function Sales() {
           </CardContent>
         </Card>
       </div>
-
-
     </div>
   );
 }
