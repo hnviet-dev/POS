@@ -8,6 +8,8 @@ import {
   selectTotal,
 } from "../../../Redux Toolkit/features/cart/cartSlice";
 
+const fmtVND = (n) => (n || 0).toLocaleString("vi-VN") + "₫";
+
 const CartSummary = () => {
   const subtotal = useSelector(selectSubtotal);
   const tax = useSelector(selectTax);
@@ -15,24 +17,32 @@ const CartSummary = () => {
   const total = useSelector(selectTotal);
 
   return (
-    <div className="border-t bg-muted p-4">
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span>Subtotal:</span>
-          <span>${subtotal.toFixed(2)}</span>
+    <div className="border-t bg-muted/50 px-4 py-3">
+      <div className="space-y-1.5 text-sm">
+        <div className="flex justify-between text-muted-foreground">
+          <span>Tạm tính</span>
+          <span>{fmtVND(subtotal)}</span>
         </div>
-        <div className="flex justify-between">
-          <span>Tax (18% GST):</span>
-          <span>${tax.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Discount:</span>
-          <span className="text-red-600">- ${discountAmount.toFixed(2)}</span>
-        </div>
-        <Separator />
-        <div className="flex justify-between text-lg font-bold">
-          <span>Total:</span>
-          <span className="text-green-600">${total?.toFixed(2)}</span>
+
+        {tax > 0 && (
+          <div className="flex justify-between text-muted-foreground">
+            <span>Thuế</span>
+            <span>{fmtVND(tax)}</span>
+          </div>
+        )}
+
+        {discountAmount > 0 && (
+          <div className="flex justify-between text-emerald-600">
+            <span>Giảm giá</span>
+            <span>- {fmtVND(discountAmount)}</span>
+          </div>
+        )}
+
+        <Separator className="my-1" />
+
+        <div className="flex justify-between font-bold text-base">
+          <span>Tổng cộng</span>
+          <span className="text-primary">{fmtVND(total)}</span>
         </div>
       </div>
     </div>
