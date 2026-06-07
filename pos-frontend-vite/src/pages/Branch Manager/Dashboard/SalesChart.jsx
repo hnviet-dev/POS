@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
@@ -8,11 +8,13 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { getDailySalesChart } from "@/Redux Toolkit/features/branchAnalytics/branchAnalyticsThunks";
+import ChartExportMenu from "@/components/charts/ChartExportMenu";
 
 const SalesChart = () => {
   const dispatch = useDispatch();
   const branchId = useSelector((state) => state.branch.branch?.id);
   const analytics = useSelector((state) => state.branchAnalytics);
+  const chartRef = useRef(null);
 
   useEffect(() => {
     if (branchId) {
@@ -34,12 +36,27 @@ const SalesChart = () => {
     },
   };
 
+  const exportColumns = [
+    { key: "name", label: "Date" },
+    { key: "sales", label: "Sales (VND)" },
+  ];
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">Daily Sales</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl font-semibold">Daily Sales</CardTitle>
+          <ChartExportMenu
+            chartRef={chartRef}
+            title="Daily Sales"
+            data={data}
+            columns={exportColumns}
+            disabled={!data.length}
+          />
+        </div>
       </CardHeader>
       <CardContent>
+        <div ref={chartRef}>
         <ChartContainer config={config}>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={data}>
@@ -75,6 +92,7 @@ const SalesChart = () => {
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
+        </div>
         {analytics?.loading && (
           <div className="text-center text-xs text-gray-400 mt-2">
             Loading...

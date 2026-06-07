@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell } from "recharts";
@@ -10,6 +10,7 @@ import {
   ChartLegendContent,
 } from "@/components/ui/chart";
 import { getTopProductsByQuantity } from "@/Redux Toolkit/features/branchAnalytics/branchAnalyticsThunks";
+import ChartExportMenu from "@/components/charts/ChartExportMenu";
 
 const COLORS = ["#6D214F", "#B33771", "#D980FA", "#833471", "#84817a"];
 
@@ -17,6 +18,7 @@ const TopProducts = () => {
   const dispatch = useDispatch();
   const branchId = useSelector((state) => state.branch.branch?.id);
   const { topProducts, loading } = useSelector((state) => state.branchAnalytics);
+  const chartRef = useRef(null);
 
   useEffect(() => {
     if (branchId) {
@@ -38,6 +40,12 @@ const TopProducts = () => {
     };
     return acc;
   }, {});
+
+  const exportColumns = [
+    { key: "name", label: "Product" },
+    { key: "value", label: "Quantity Sold" },
+    { key: "percentage", label: "Percentage (%)" },
+  ];
 
   const renderCustomizedLabel = ({
     cx,
@@ -69,11 +77,21 @@ const TopProducts = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">
-          Product Performance
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl font-semibold">
+            Product Performance
+          </CardTitle>
+          <ChartExportMenu
+            chartRef={chartRef}
+            title="Product Performance"
+            data={data}
+            columns={exportColumns}
+            disabled={loading || !data.length}
+          />
+        </div>
       </CardHeader>
       <CardContent>
+        <div ref={chartRef}>
         <ChartContainer config={config}>
           <PieChart>
             <Pie
@@ -112,6 +130,7 @@ const TopProducts = () => {
             />
           </PieChart>
         </ChartContainer>
+        </div>
         {loading && <div className="text-center text-xs text-gray-400 mt-2">Loading...</div>}
       </CardContent>
     </Card>

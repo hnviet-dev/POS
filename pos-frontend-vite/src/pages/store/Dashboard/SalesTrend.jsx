@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Calendar } from "lucide-react";
@@ -23,6 +23,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
+import ChartExportMenu from "@/components/charts/ChartExportMenu";
 
 const SalesTrend = () => {
   const dispatch = useDispatch();
@@ -32,6 +33,7 @@ const SalesTrend = () => {
   );
   const { userProfile } = useSelector((state) => state.user);
   const [period, setPeriod] = useState("daily");
+  const chartRef = useRef(null);
 
   useEffect(() => {
     if (userProfile?.id) {
@@ -77,13 +79,25 @@ const SalesTrend = () => {
   };
 
   const chartData = getChartData();
+  const exportColumns = [
+    { key: "date", label: "Date" },
+    { key: "sales", label: "Sales (VND)" },
+  ];
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-semibold">Sales Trend</CardTitle>
-          <Select value={period} onValueChange={setPeriod}>
+          <div className="flex items-center gap-2">
+            <ChartExportMenu
+              chartRef={chartRef}
+              title="Sales Trend"
+              data={chartData}
+              columns={exportColumns}
+              disabled={loading || chartData.length === 0}
+            />
+            <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-32">
               <SelectValue />
             </SelectTrigger>
@@ -93,6 +107,7 @@ const SalesTrend = () => {
               <SelectItem value="monthly">Monthly</SelectItem>
             </SelectContent>
           </Select>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -104,6 +119,7 @@ const SalesTrend = () => {
             </div>
           </div>
         ) : chartData.length > 0 ? (
+          <div ref={chartRef}>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={chartData}>
               <XAxis
@@ -134,6 +150,7 @@ const SalesTrend = () => {
               />
             </LineChart>
           </ResponsiveContainer>
+          </div>
         ) : (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">

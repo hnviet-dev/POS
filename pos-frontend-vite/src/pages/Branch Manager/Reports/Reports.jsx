@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ import {
   getTopCashiersByRevenue,
 } from "@/Redux Toolkit/features/branchAnalytics/branchAnalyticsThunks";
 import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
+import ChartExportMenu from "@/components/charts/ChartExportMenu";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
@@ -43,6 +44,11 @@ const Reports = () => {
   const branchId = useSelector((state) => state.branch.branch?.id);
   const { dailySales, paymentBreakdown, categorySales, topCashiers } =
     useSelector((state) => state.branchAnalytics);
+  const overviewSalesChartRef = useRef(null);
+  const overviewPaymentChartRef = useRef(null);
+  const salesChartRef = useRef(null);
+  const productsChartRef = useRef(null);
+  const cashierChartRef = useRef(null);
 
   useEffect(() => {
     if (branchId) {
@@ -111,10 +117,22 @@ const Reports = () => {
     },
   };
 
-  const handleExport = (type, format) => {
-    console.log(`Exporting ${type} report in ${format} format`);
-    // Implement export functionality
-  };
+  const salesColumns = [
+    { key: "date", label: "Date" },
+    { key: "sales", label: "Sales (VND)" },
+  ];
+  const paymentColumns = [
+    { key: "name", label: "Payment Method" },
+    { key: "value", label: "Percentage (%)" },
+  ];
+  const categoryColumns = [
+    { key: "name", label: "Category" },
+    { key: "value", label: "Sales (VND)" },
+  ];
+  const cashierColumns = [
+    { key: "name", label: "Cashier" },
+    { key: "sales", label: "Revenue (VND)" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -163,18 +181,17 @@ const Reports = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Daily Sales Trend</CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => handleExport("sales", "excel")}
-                  >
-                    <Download className="h-4 w-4" />
-                    Export
-                  </Button>
+                  <ChartExportMenu
+                    chartRef={overviewSalesChartRef}
+                    title="Daily Sales Trend"
+                    data={salesData}
+                    columns={salesColumns}
+                    disabled={!salesData.length}
+                  />
                 </div>
               </CardHeader>
               <CardContent>
+                <div ref={overviewSalesChartRef}>
                 <ChartContainer config={salesConfig}>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={salesData}>
@@ -210,6 +227,7 @@ const Reports = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 </ChartContainer>
+                </div>
               </CardContent>
             </Card>
 
@@ -217,18 +235,17 @@ const Reports = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle>Payment Methods</CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => handleExport("payments", "excel")}
-                  >
-                    <Download className="h-4 w-4" />
-                    Export
-                  </Button>
+                  <ChartExportMenu
+                    chartRef={overviewPaymentChartRef}
+                    title="Payment Methods"
+                    data={paymentData}
+                    columns={paymentColumns}
+                    disabled={!paymentData.length}
+                  />
                 </div>
               </CardHeader>
               <CardContent>
+                <div ref={overviewPaymentChartRef}>
                 <ChartContainer config={paymentConfig}>
                   <ResponsiveContainer width="100%" height={400}>
                     <RPieChart>
@@ -268,6 +285,7 @@ const Reports = () => {
                     </RPieChart>
                   </ResponsiveContainer>
                 </ChartContainer>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -279,18 +297,17 @@ const Reports = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Sales Performance</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => handleExport("sales", "excel")}
-                >
-                  <Download className="h-4 w-4" />
-                  Export
-                </Button>
+                <ChartExportMenu
+                  chartRef={salesChartRef}
+                  title="Sales Performance"
+                  data={salesData}
+                  columns={salesColumns}
+                  disabled={!salesData.length}
+                />
               </div>
             </CardHeader>
             <CardContent>
+              <div ref={salesChartRef}>
               <ChartContainer config={salesConfig}>
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={salesData}>
@@ -326,6 +343,7 @@ const Reports = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -336,19 +354,18 @@ const Reports = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Product Category Performance</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => handleExport("products", "excel")}
-                >
-                  <Download className="h-4 w-4" />
-                  Export
-                </Button>
+                <ChartExportMenu
+                  chartRef={productsChartRef}
+                  title="Product Category Performance"
+                  data={categoryData}
+                  columns={categoryColumns}
+                  disabled={!categoryData.length}
+                />
               </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div ref={productsChartRef}>
                 <ChartContainer config={categoryConfig}>
                   <ResponsiveContainer width="100%" height={300}>
                     <RPieChart>
@@ -391,6 +408,7 @@ const Reports = () => {
                     </RPieChart>
                   </ResponsiveContainer>
                 </ChartContainer>
+                </div>
 
                 <div className="space-y-4">
                   {categoryData.map((category, index) => (
@@ -425,18 +443,17 @@ const Reports = () => {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Cashier Performance</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => handleExport("cashier", "excel")}
-                >
-                  <Download className="h-4 w-4" />
-                  Export
-                </Button>
+                <ChartExportMenu
+                  chartRef={cashierChartRef}
+                  title="Cashier Performance"
+                  data={cashierData}
+                  columns={cashierColumns}
+                  disabled={!cashierData.length}
+                />
               </div>
             </CardHeader>
             <CardContent>
+              <div ref={cashierChartRef}>
               <ChartContainer config={cashierConfig}>
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart
@@ -481,6 +498,7 @@ const Reports = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

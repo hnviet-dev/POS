@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Store, Clock, TrendingUp, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import ChartExportMenu from "@/components/charts/ChartExportMenu";
 import {
   getDashboardSummary,
   getStoreRegistrationStats,
@@ -42,6 +43,8 @@ export default function Dashboard() {
     loading,
     error
   } = useSelector((state) => state.adminDashboard);
+  const registrationChartRef = useRef(null);
+  const statusChartRef = useRef(null);
 
   useEffect(() => {
     dispatch(getDashboardSummary());
@@ -62,6 +65,15 @@ export default function Dashboard() {
       { name: "Blocked", value: storeStatusDistribution.blocked, color: COLORS[2] },
     ]
     : [];
+
+  const registrationColumns = [
+    { key: "date", label: "Date" },
+    { key: "stores", label: "Stores Registered" },
+  ];
+  const statusColumns = [
+    { key: "name", label: "Status" },
+    { key: "value", label: "Count" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -111,9 +123,19 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Store Registrations (Last 7 Days)</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Store Registrations (Last 7 Days)</CardTitle>
+              <ChartExportMenu
+                chartRef={registrationChartRef}
+                title="Store Registrations"
+                data={barData}
+                columns={registrationColumns}
+                disabled={loading || !barData.length}
+              />
+            </div>
           </CardHeader>
           <CardContent className="pl-2">
+            <div ref={registrationChartRef}>
             <ResponsiveContainer width="100%" height={350}>
               <BarChart data={barData}>
                 <XAxis
@@ -140,14 +162,25 @@ export default function Dashboard() {
                 />
               </BarChart>
             </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Store Status Distribution</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Store Status Distribution</CardTitle>
+              <ChartExportMenu
+                chartRef={statusChartRef}
+                title="Store Status Distribution"
+                data={pieData}
+                columns={statusColumns}
+                disabled={loading || !pieData.length}
+              />
+            </div>
           </CardHeader>
           <CardContent>
+            <div ref={statusChartRef}>
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie
@@ -167,6 +200,7 @@ export default function Dashboard() {
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>

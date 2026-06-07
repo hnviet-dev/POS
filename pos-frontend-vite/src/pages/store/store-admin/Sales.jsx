@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +59,7 @@ import {
 } from "@/Redux Toolkit/features/storeAnalytics/storeAnalyticsThunks";
 import { useToast } from "@/components/ui/use-toast";
 import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
+import ChartExportMenu from "@/components/charts/ChartExportMenu";
 
 export default function Sales() {
   const dispatch = useDispatch();
@@ -66,6 +67,8 @@ export default function Sales() {
   const { userProfile } = useSelector((state) => state.user);
   const { storeOverview, dailySales, salesByPaymentMethod, loading } =
     useSelector((state) => state.storeAnalytics);
+  const dailySalesChartRef = useRef(null);
+  const paymentChartRef = useRef(null);
 
   useEffect(() => {
     if (userProfile?.id) {
@@ -127,7 +130,14 @@ export default function Sales() {
     },
   };
 
-  console.log("sales daily", dailySales);
+  const dailySalesColumns = [
+    { key: "date", label: "Date" },
+    { key: "sales", label: "Sales (VND)" },
+  ];
+  const paymentColumns = [
+    { key: "name", label: "Payment Method" },
+    { key: "value", label: "Amount (VND)" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -271,7 +281,16 @@ export default function Sales() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Daily Sales (Last 7 Days)</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Daily Sales (Last 7 Days)</CardTitle>
+              <ChartExportMenu
+                chartRef={dailySalesChartRef}
+                title="Daily Sales"
+                data={dailySalesData}
+                columns={dailySalesColumns}
+                disabled={loading || dailySalesData.length === 0}
+              />
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -282,6 +301,7 @@ export default function Sales() {
                 </div>
               </div>
             ) : dailySalesData.length > 0 ? (
+              <div ref={dailySalesChartRef}>
               <ChartContainer config={salesConfig}>
                 <ResponsiveContainer width="100%" height={320}>
                   <LineChart data={dailySalesData}>
@@ -322,6 +342,7 @@ export default function Sales() {
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              </div>
             ) : (
               <div className="h-80 flex items-center justify-center">
                 <p className="text-gray-500">No sales data available</p>
@@ -332,7 +353,16 @@ export default function Sales() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Payment Methods</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Payment Methods</CardTitle>
+              <ChartExportMenu
+                chartRef={paymentChartRef}
+                title="Payment Methods"
+                data={paymentMethodData}
+                columns={paymentColumns}
+                disabled={loading || paymentMethodData.length === 0}
+              />
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -343,6 +373,7 @@ export default function Sales() {
                 </div>
               </div>
             ) : paymentMethodData.length > 0 ? (
+              <div ref={paymentChartRef}>
               <ChartContainer config={paymentConfig}>
                 <ResponsiveContainer width="100%" height={320}>
                   <BarChart data={paymentMethodData}>
@@ -381,6 +412,7 @@ export default function Sales() {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              </div>
             ) : (
               <div className="h-80 flex items-center justify-center">
                 <p className="text-gray-500">No payment data available</p>

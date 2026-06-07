@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/chart";
 import { User } from "lucide-react";
 import { getTopCashiersByRevenue } from "@/Redux Toolkit/features/branchAnalytics/branchAnalyticsThunks";
+import ChartExportMenu from "@/components/charts/ChartExportMenu";
 
 const CashierPerformance = () => {
   const dispatch = useDispatch();
@@ -16,6 +17,7 @@ const CashierPerformance = () => {
   const { topCashiers, loading } = useSelector(
     (state) => state.branchAnalytics,
   );
+  const chartRef = useRef(null);
 
   useEffect(() => {
     if (branchId) {
@@ -37,6 +39,11 @@ const CashierPerformance = () => {
     },
   };
 
+  const exportColumns = [
+    { key: "name", label: "Cashier" },
+    { key: "sales", label: "Revenue (VND)" },
+  ];
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -44,11 +51,19 @@ const CashierPerformance = () => {
           Cashier Performance
         </CardTitle>
         <div className="flex items-center gap-2">
+          <ChartExportMenu
+            chartRef={chartRef}
+            title="Cashier Performance"
+            data={data}
+            columns={exportColumns}
+            disabled={loading || !data.length}
+          />
           <User className="h-5 w-5 text-primary" />
           <span className="text-sm text-gray-500">Top 5 Cashiers</span>
         </div>
       </CardHeader>
       <CardContent>
+        <div ref={chartRef}>
         <ChartContainer config={config}>
           <ResponsiveContainer width="100%" height={256}>
             <BarChart
@@ -95,6 +110,7 @@ const CashierPerformance = () => {
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
+        </div>
         {loading && (
           <div className="text-center text-xs text-gray-400 mt-2">
             Loading...

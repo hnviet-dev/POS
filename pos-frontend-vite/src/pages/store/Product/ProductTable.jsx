@@ -18,8 +18,7 @@ const ProductTable = ({ products, loading, onEdit, onView }) => {
 
   const handleDeleteProduct = async (id) => {
     try {
-      const token = localStorage.getItem("jwt");
-      await dispatch(deleteProduct({ id, token })).unwrap();
+      await dispatch(deleteProduct(id)).unwrap();
       toast({ title: "Success", description: "Product deleted successfully" });
     } catch (err) {
       toast({

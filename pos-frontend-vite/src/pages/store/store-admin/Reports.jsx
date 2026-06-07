@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,7 @@ import {
 } from "@/Redux Toolkit/features/storeAnalytics/storeAnalyticsThunks";
 import { useToast } from "@/components/ui/use-toast";
 import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
+import ChartExportMenu from "@/components/charts/ChartExportMenu";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
@@ -93,6 +94,8 @@ export default function Reports() {
 
   const [reportType, setReportType] = useState("all");
   const [dateRange, setDateRange] = useState("last30");
+  const monthlySalesChartRef = useRef(null);
+  const categoryChartRef = useRef(null);
 
   useEffect(() => {
     if (userProfile?.id) {
@@ -151,6 +154,15 @@ export default function Reports() {
     return config;
   }, {});
 
+  const monthlySalesColumns = [
+    { key: "name", label: "Month" },
+    { key: "sales", label: "Sales (VND)" },
+  ];
+  const categoryColumns = [
+    { key: "name", label: "Category" },
+    { key: "value", label: "Sales (VND)" },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -163,7 +175,16 @@ export default function Reports() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Monthly Sales Trend</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Monthly Sales Trend</CardTitle>
+              <ChartExportMenu
+                chartRef={monthlySalesChartRef}
+                title="Monthly Sales Trend"
+                data={salesData}
+                columns={monthlySalesColumns}
+                disabled={loading || salesData.length === 0}
+              />
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -174,6 +195,7 @@ export default function Reports() {
                 </div>
               </div>
             ) : salesData.length > 0 ? (
+              <div ref={monthlySalesChartRef}>
               <ChartContainer config={salesConfig}>
                 <ResponsiveContainer width="100%" height={320}>
                   <BarChart data={salesData}>
@@ -211,6 +233,7 @@ export default function Reports() {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              </div>
             ) : (
               <div className="h-80 flex items-center justify-center">
                 <p className="text-gray-500">No sales data available</p>
@@ -221,7 +244,16 @@ export default function Reports() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Sales by Category</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Sales by Category</CardTitle>
+              <ChartExportMenu
+                chartRef={categoryChartRef}
+                title="Sales by Category"
+                data={categoryData}
+                columns={categoryColumns}
+                disabled={loading || categoryData.length === 0}
+              />
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -232,6 +264,7 @@ export default function Reports() {
                 </div>
               </div>
             ) : categoryData.length > 0 ? (
+              <div ref={categoryChartRef}>
               <ChartContainer config={categoryConfig}>
                 <ResponsiveContainer width="100%" height={320}>
                   <PieChart>
@@ -274,6 +307,7 @@ export default function Reports() {
                   </PieChart>
                 </ResponsiveContainer>
               </ChartContainer>
+              </div>
             ) : (
               <div className="h-80 flex items-center justify-center">
                 <p className="text-gray-500">No category data available</p>
