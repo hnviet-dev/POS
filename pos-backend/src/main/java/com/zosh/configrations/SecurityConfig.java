@@ -29,6 +29,10 @@ public class SecurityConfig {
 		
 		return http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(Authorize -> Authorize
+						// Webhook từ SePay không có JWT → phải permitAll
+						.requestMatchers("/api/webhook/**").permitAll()
+						// QR payment status + simulate → cashier frontend gọi, cũng permitAll cho đơn giản
+						.requestMatchers("/api/qr-payments/**").permitAll()
 						.requestMatchers("/api/**").authenticated()
 						.requestMatchers("/api/super-admin/**").hasRole("ADMIN")
 						.anyRequest().permitAll())

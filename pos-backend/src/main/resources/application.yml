@@ -45,7 +45,7 @@ stripe:
 
 gemini:
   api:
-    key: AIzaSyDfk21GgwCvFuAL3ozmZT0g2L4RGXFZx_U
+    key: AIzaSyDg8EpsecgrlgcPTZvqhQwKwV1fPsnQMjE
 
 app:
   frontend:
@@ -59,3 +59,11 @@ logging:
         type:
           descriptor:
             sql: TRACE
+
+# SePay configuration
+# Lấy API token tại: https://my.sepay.vn/userapi
+sepay:
+  api:
+    token: KEBEVIZFFTGZDYUHU7OHNX0TULS4QYJPKRQPWF5BKOICN5LUYGJRL6ICMAMOSCW1
+  account:
+    number: VQRQAJOHG9152
