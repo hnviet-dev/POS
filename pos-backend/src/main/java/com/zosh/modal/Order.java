@@ -24,6 +24,8 @@ public class Order {
 
     private Double totalAmount;
 
+    private Double discountAmount; // Số tiền giảm giá thực tế
+
     private LocalDateTime createdAt;
 
     @ManyToOne

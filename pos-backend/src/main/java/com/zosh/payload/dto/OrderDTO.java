@@ -16,6 +16,7 @@ import java.util.List;
 public class OrderDTO {
     private Long id;
     private Double totalAmount;
+    private Double discountAmount; // Số tiền giảm giá (tính sẵn từ frontend)
     private Long branchId;
     private Long cashierId;
     private Customer customer;

@@ -16,6 +16,7 @@ import {
 } from "../../../Redux Toolkit/features/cart/cartSlice";
 import { useDispatch } from "react-redux";
 import { useToast } from "../../../components/ui/use-toast";
+import { fmtVND } from "@/utils/formatCurrency";
 
 const ReceiptDialog = ({ showReceiptDialog, setShowReceiptDialog }) => {
   const paymentMethod = useSelector(selectPaymentMethod);
@@ -51,8 +52,8 @@ const ReceiptDialog = ({ showReceiptDialog, setShowReceiptDialog }) => {
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>Order Total:</span>
-                <span className="font-semibold">${total.toFixed(2)}</span>
+                <span>Tổng thanh toán:</span>
+                <span className="font-semibold">{fmtVND(total)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Payment Method:</span>

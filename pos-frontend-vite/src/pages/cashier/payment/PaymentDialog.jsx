@@ -208,6 +208,7 @@ const PaymentDialog = ({
     try {
       const orderData = {
         totalAmount: total,
+        discountAmount: discountAmount,
         branchId: branch.id,
         cashierId: userProfile.id,
         customer: selectedCustomer || null,

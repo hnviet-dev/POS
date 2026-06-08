@@ -136,10 +136,9 @@ export const selectSubtotal = (state) => {
   );
 };
 
-export const selectTax = (state) => {
-  const subtotal = selectSubtotal(state);
-  return subtotal * 0.18; // 18% GST
-};
+// Thuế: sellingPrice đã bao gồm VAT trong bối cảnh POS Việt Nam
+// → Không cộng thêm thuế. Giữ selector = 0 để không break các component đang dùng.
+export const selectTax = (_state) => 0;
 
 export const selectDiscountAmount = (state) => {
   const subtotal = selectSubtotal(state);
@@ -148,15 +147,14 @@ export const selectDiscountAmount = (state) => {
   if (discount.type === "percentage") {
     return subtotal * (discount.value / 100);
   } else {
-    return discount.value;
+    return Math.min(discount.value, subtotal); // fixed discount không vượt subtotal
   }
 };
 
 export const selectTotal = (state) => {
   const subtotal = selectSubtotal(state);
-  const tax = selectTax(state);
   const discountAmount = selectDiscountAmount(state);
-  return subtotal + tax - discountAmount;
+  return Math.max(0, subtotal - discountAmount); // đảm bảo không âm
 };
 
 export const {

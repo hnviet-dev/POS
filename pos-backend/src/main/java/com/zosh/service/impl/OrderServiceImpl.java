@@ -98,8 +98,25 @@ public class OrderServiceImpl implements OrderService {
                     .build());
         }
 
-        double total = orderItems.stream().mapToDouble(OrderItem::getPrice).sum();
-        order.setTotalAmount(total);
+        // Tổng gốc từ items (chưa trừ discount)
+        double subtotalFromItems = orderItems.stream().mapToDouble(OrderItem::getPrice).sum();
+
+        // Ưu tiên dùng totalAmount từ frontend (đã trừ discount)
+        // Nếu frontend không gửi hoặc gửi 0 → fallback về subtotal từ items
+        double finalTotal = (dto.getTotalAmount() != null && dto.getTotalAmount() > 0)
+                ? dto.getTotalAmount()
+                : subtotalFromItems;
+
+        // Tính discountAmount: nếu frontend gửi → dùng; nếu không → suy ngược từ chênh lệch
+        double discountAmount = 0.0;
+        if (dto.getDiscountAmount() != null && dto.getDiscountAmount() > 0) {
+            discountAmount = dto.getDiscountAmount();
+        } else if (subtotalFromItems > finalTotal) {
+            discountAmount = subtotalFromItems - finalTotal;
+        }
+
+        order.setTotalAmount(finalTotal);
+        order.setDiscountAmount(discountAmount);
         order.setItems(orderItems);
 
         OrderDTO savedOrder = OrderMapper.toDto(orderRepository.save(order));

@@ -58,7 +58,7 @@ const DiscountSection = () => {
           }`}
           onClick={() => handleSetType("fixed")}
         >
-          Số tiền ($)
+          Số tiền (₫)
         </button>
       </div>
 
@@ -74,7 +74,7 @@ const DiscountSection = () => {
           className="pr-10"
         />
         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
-          {discount.type === "percentage" ? "%" : "$"}
+          {discount.type === "percentage" ? "%" : "₫"}
         </span>
       </div>
 
