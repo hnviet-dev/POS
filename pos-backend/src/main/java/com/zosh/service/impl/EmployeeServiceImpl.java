@@ -61,16 +61,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         System.out.println("employee: " + employee);
 
-        User isExist=userRepository.findByEmail(dto.getEmail());
+        User isExist = userRepository.findByEmail(dto.getEmail());
 
-        System.out.println("isExist: " + isExist);
-        if(isExist!=null){
-            employee.setId(isExist.getId());
+        if (isExist != null) {
+            // Không cho phép ghi đè user cũ — ném lỗi rõ ràng
+            throw new UserException("Email '" + dto.getEmail() + "' đã được sử dụng. Vui lòng dùng email khác.");
         }
 
         User savedEmployee = userRepository.save(employee);
-
-        System.out.println("savedEmployee: " + savedEmployee);
 
         // Assign manager to the branch if applicable
         if (dto.getRole() == UserRole.ROLE_BRANCH_MANAGER && branch != null) {
@@ -93,9 +91,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setPassword(passwordEncoder.encode(employee.getPassword()));
         employee.setBranch(branch);
 
-        User isExist=userRepository.findByEmail(employee.getEmail());
-        if(isExist!=null){
-            employee.setId(isExist.getId());
+        User isExist = userRepository.findByEmail(employee.getEmail());
+        if (isExist != null) {
+            throw new UserException("Email '" + employee.getEmail() + "' đã được sử dụng. Vui lòng dùng email khác.");
         }
 
         return userRepository.save(employee);
