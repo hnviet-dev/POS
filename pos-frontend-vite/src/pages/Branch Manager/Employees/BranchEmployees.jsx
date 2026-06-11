@@ -20,6 +20,7 @@ import {
   findBranchEmployees,
   updateEmployee,
 } from "../../../Redux Toolkit/features/employee/employeeThunks";
+import { useToast } from "@/components/ui/use-toast";
 
 const getStatusColor = (status) => {
   if (status === "Active") {
@@ -45,6 +46,7 @@ const BranchEmployees = () => {
   const { branch } = useSelector((state) => state.branch);
   const { employees } = useSelector((state) => state.employee)
   const { userProfile } = useSelector((state) => state.user);
+  const { toast } = useToast();
 
 
   console.log("branch employees", employees);
@@ -53,20 +55,35 @@ const BranchEmployees = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleAddEmployee = (newEmployeeData) => {
+  const handleAddEmployee = async (newEmployeeData) => {
     if (branch?.id && userProfile.branchId) {
       const data = {
         employee: {
           ...newEmployeeData,
-
           username: newEmployeeData.email.split("@")[0],
         },
         branchId: branch.id,
         token: localStorage.getItem("jwt"),
       };
-      console.log("branch employee data ", data);
-      dispatch(createBranchEmployee(data));
-      setIsAddDialogOpen(false);
+      try {
+        await dispatch(createBranchEmployee(data)).unwrap();
+
+        // Thành công
+        toast({
+          title: "Thêm nhân viên thành công",
+          description: `${newEmployeeData.fullName || newEmployeeData.email} đã được thêm vào chi nhánh.`,
+          variant: "success",
+        });
+        setIsAddDialogOpen(false);
+      } catch (err) {
+        // Lỗi từ backend
+        toast({
+          title: "Không thể thêm nhân viên",
+          description: err || "Đã xảy ra lỗi. Vui lòng thử lại.",
+          variant: "destructive",
+        });
+        // Giữ dialog mở để user sửa
+      }
     }
   };
 

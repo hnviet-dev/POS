@@ -18,11 +18,13 @@ import {
   deleteEmployee,
 } from "@/Redux Toolkit/features/employee/employeeThunks";
 import { storeAdminRole } from "../../../utils/userRole";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function StoreEmployees() {
   const dispatch = useDispatch();
   const { employees } = useSelector((state) => state.employee);
   const {store}=useSelector(state=>state.store)
+  const { toast } = useToast();
 
   useEffect(() => {
     if (store?.id) {
@@ -39,20 +41,37 @@ export default function StoreEmployees() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState(null);
 
-  const handleAddEmployee = (newEmployeeData) => {
+  const handleAddEmployee = async (newEmployeeData) => {
     if (store?.id && localStorage.getItem("jwt")) {
-      dispatch(
-        createStoreEmployee({
-          employee: {
-            ...newEmployeeData,
+      try {
+        await dispatch(
+          createStoreEmployee({
+            employee: {
+              ...newEmployeeData,
+              storeId: store?.id,
+              username: newEmployeeData.email.split("@")[0],
+            },
             storeId: store?.id,
-            username: newEmployeeData.email.split("@")[0],
-          },
-          storeId: store?.id,
-          token: localStorage.getItem("jwt"),
-        })
-      );
-      setIsAddDialogOpen(false);
+            token: localStorage.getItem("jwt"),
+          })
+        ).unwrap();
+
+        // Thành công
+        toast({
+          title: "Thêm nhân viên thành công",
+          description: `${newEmployeeData.fullName || newEmployeeData.email} đã được thêm vào hệ thống.`,
+          variant: "success",
+        });
+        setIsAddDialogOpen(false);
+      } catch (err) {
+        // Lỗi từ backend (vd: email đã tồn tại)
+        toast({
+          title: "Không thể thêm nhân viên",
+          description: err || "Đã xảy ra lỗi. Vui lòng thử lại.",
+          variant: "destructive",
+        });
+        // Giữ dialog mở để user sửa
+      }
     }
   };
 
