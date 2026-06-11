@@ -38,11 +38,11 @@
     export const getPaymentModeLabel = (mode) => {
       switch (mode) {
         case 'CASH':
-          return 'Cash';
+          return 'Tiền mặt';
         case 'CARD':
-          return 'Card';
+          return 'Thẻ ngân hàng';
         case 'UPI':
-          return 'UPI';
+          return 'Chuyển khoản / QR';
         default:
           return mode;
       }

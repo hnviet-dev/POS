@@ -36,6 +36,7 @@ import {
 } from "@/Redux Toolkit/features/branchAnalytics/branchAnalyticsThunks";
 import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
 import ChartExportMenu from "@/components/charts/ChartExportMenu";
+import { getPaymentLabel } from "@/utils/getPaymentIcon";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
@@ -69,14 +70,15 @@ const Reports = () => {
 
   const paymentData =
     paymentBreakdown?.map((item) => ({
-      name: item.type,
+      name: getPaymentLabel(item.type),
       value: item.percentage,
     })) || [];
 
   const paymentConfig =
     paymentBreakdown?.reduce((acc, item, idx) => {
-      acc[item.type] = {
-        label: item.type,
+      const label = getPaymentLabel(item.type);
+      acc[label] = {
+        label,
         color: COLORS[idx % COLORS.length],
       };
       return acc;

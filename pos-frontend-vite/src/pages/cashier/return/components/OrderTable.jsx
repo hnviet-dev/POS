@@ -12,6 +12,7 @@ import {
 import { SearchIcon } from "lucide-react";
 import { formatDate } from "../../order/data";
 import { useSelector } from "react-redux";
+import { PaymentBadge } from "@/utils/getPaymentIcon";
 
 const OrderTable = ({ handleSelectOrder }) => {
   const { orders, loading, error } = useSelector((state) => state.order);
@@ -45,7 +46,7 @@ const OrderTable = ({ handleSelectOrder }) => {
                   <TableCell>{formatDate(order.createdAt)}</TableCell>
                   <TableCell>{order.customer?.fullName}</TableCell>
                   <TableCell>${order.totalAmount?.toFixed(2)}</TableCell>
-                  <TableCell>{order.paymentType}</TableCell>
+                  <TableCell><PaymentBadge type={order.paymentType} /></TableCell>
                   <TableCell className="text-right">
                     <Button onClick={() => handleSelectOrder(order)}>
                       Select for Return

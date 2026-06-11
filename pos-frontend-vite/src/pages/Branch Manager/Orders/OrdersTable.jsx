@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, FileText, ArrowUpDown } from "lucide-react";
+import { PaymentBadge } from "@/utils/getPaymentIcon";
 
 const OrdersTable = ({
   orders,
@@ -68,9 +69,7 @@ const OrdersTable = ({
                 {order.totalAmount ? `$${order.totalAmount}` : "-"}
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  {getPaymentIcon(order.paymentType)} {order.paymentType || "-"}
-                </div>
+                <PaymentBadge type={order.paymentType} />
               </TableCell>
               <TableCell>
                 <Badge

@@ -10,6 +10,7 @@ import {
 import { Card, CardContent } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { Eye } from "lucide-react";
+import { PaymentBadge } from "@/utils/getPaymentIcon";
 
 const TransactionTable = ({ filteredTransactions, handleViewTransaction }) => {
   return (
@@ -51,7 +52,7 @@ const TransactionTable = ({ filteredTransactions, handleViewTransaction }) => {
                     ? `+$${transaction.totalAmount.toFixed(2)}`
                     : `-$${Math.abs(transaction.totalAmount).toFixed(2)}`}
                 </TableCell>
-                <TableCell>{transaction.paymentType}</TableCell>
+                <TableCell><PaymentBadge type={transaction.paymentType} /></TableCell>
                 <TableCell>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     {transaction.status}

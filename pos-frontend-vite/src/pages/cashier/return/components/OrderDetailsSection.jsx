@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "../../order/data";
+import { PaymentBadge } from "@/utils/getPaymentIcon";
 
 const OrderDetailsSection = ({ selectedOrder, setSelectedOrder }) => (
   <div className="w-1/2 border-r p-4 flex flex-col">
@@ -32,7 +33,9 @@ const OrderDetailsSection = ({ selectedOrder, setSelectedOrder }) => (
               {formatDate(selectedOrder.createdAt)}
             </p>
           </div>
-          <Badge variant="outline">{selectedOrder.paymentType}</Badge>
+          <div className="flex items-center gap-1.5">
+            <PaymentBadge type={selectedOrder.paymentType} />
+          </div>
         </div>
         <div className="mb-4">
           <h3 className="font-medium text-sm text-muted-foreground mb-2">

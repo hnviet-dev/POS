@@ -27,6 +27,7 @@ import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { getOrdersByBranch } from "../../../Redux Toolkit/features/order/orderThunks";
 import { Printer } from "lucide-react";
+import { PaymentBadge } from "@/utils/getPaymentIcon";
 
 export default function Transactions() {
   const { orders } = useSelector((state) => state.order);
@@ -179,7 +180,7 @@ export default function Transactions() {
                   <p className="text-sm font-medium text-gray-500">
                     Payment Method
                   </p>
-                  <p>{selectedTransaction.paymentType}</p>
+                  <p><PaymentBadge type={selectedTransaction.paymentType} /></p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">Amount</p>

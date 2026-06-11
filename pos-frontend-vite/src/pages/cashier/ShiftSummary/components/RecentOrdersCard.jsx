@@ -9,8 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatTime } from "../../../../utils/formateDate";
-import { getPaymentIcon } from "../../../../utils/getPaymentIcon";
-import { getPaymentMethodLabel } from "../../../../utils/paymentMethodLable";
+import { PaymentBadge } from "../../../../utils/getPaymentIcon";
 
 const RecentOrdersCard = ({ shiftData }) => {
   return (
@@ -31,15 +30,8 @@ const RecentOrdersCard = ({ shiftData }) => {
               <TableRow key={order.id}>
                 <TableCell className="font-medium">{order.id}</TableCell>
                 <TableCell>{formatTime(order.createdAt)}</TableCell>
-                <TableCell className="flex items-center gap-1">
-                  {order.paymentType ? (
-                    <>
-                      {getPaymentIcon(order.paymentType)}
-                      <span>{order.paymentType}</span>
-                    </>
-                  ) : (
-                    "UNKNOWN"
-                  )}
+                <TableCell>
+                  <PaymentBadge type={order.paymentType} />
                 </TableCell>
                 <TableCell className="text-right">
                   ${order.totalAmount?.toFixed(2)}

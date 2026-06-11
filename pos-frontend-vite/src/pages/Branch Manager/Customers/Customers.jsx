@@ -26,6 +26,7 @@ import { useDispatch } from "react-redux";
 import { getAllCustomers } from "../../../Redux Toolkit/features/customer/customerThunks";
 import { clearCustomerOrders } from "../../../Redux Toolkit/features/order/orderSlice";
 import { getOrdersByCustomer } from "../../../Redux Toolkit/features/order/orderThunks";
+import { PaymentBadge } from "@/utils/getPaymentIcon";
 
 const Customers = () => {
   // Sample data - in a real app, this would come from an API
@@ -407,7 +408,7 @@ const Customers = () => {
                           <TableCell>{order.totalAmount}</TableCell>
                           <TableCell>{order.items.map((orderItem) => <p>{
                             orderItem.product?.name?.slice(0, 15)}...</p>)}</TableCell>
-                          <TableCell>{order.paymentType}</TableCell>
+                          <TableCell><PaymentBadge type={order.paymentType} /></TableCell>
                           <TableCell>
                             <Badge
                               className={getStatusColor(order.status)}

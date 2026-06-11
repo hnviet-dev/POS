@@ -1,8 +1,7 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSelector } from 'react-redux';
-import { CreditCard } from 'lucide-react';
-import { getPaymentIcon } from '../../../utils/getPaymentIcon';
+import { getPaymentIcon, getPaymentLabel } from '../../../utils/getPaymentIcon';
 
 
 const PaymentBreakdown = () => {
@@ -20,7 +19,7 @@ const PaymentBreakdown = () => {
               <div className="flex items-center gap-2">
                 {getPaymentIcon(payment.type)}
                 {/* <CreditCard className="w-5 h-5 text-primary" /> */}
-                <span>{payment.type}</span>
+                <span>{getPaymentLabel(payment.type)}</span>
               </div>
               <div className="flex items-center gap-4">
                 <div className="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { PrinterIcon } from "lucide-react";
+import { getPaymentLabel } from "@/utils/getPaymentIcon";
 import {
   Table,
   TableHeader,
@@ -99,7 +100,7 @@ const ReturnReceiptDialog = ({
           </div>
           <div className="flex justify-between pt-1">
             <span>Refund Method</span>
-            <span>{selectedOrder.paymentType}</span>
+            <span>{getPaymentLabel(selectedOrder.paymentType)}</span>
           </div>
           <div className="flex justify-between pt-1">
             <span>Return Reason</span>

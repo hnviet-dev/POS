@@ -1,5 +1,6 @@
 import React from "react";
 import { formatDate, getPaymentModeLabel, getStatusBadgeVariant } from "./data";
+import { PaymentBadge } from "@/utils/getPaymentIcon";
 import {
   Table,
   TableBody,
@@ -42,7 +43,7 @@ const OrderTable = ({
               {order.customer?.fullName || "Walk-in Customer"}
             </TableCell>
             <TableCell>${order.totalAmount?.toFixed(2) || "0.00"}</TableCell>
-            <TableCell>{order.paymentType}</TableCell>
+            <TableCell><PaymentBadge type={order.paymentType} /></TableCell>
             <TableCell>
               <Badge
                 variant={getStatusBadgeVariant(order.status)}

@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { getPaymentIcon } from "../../../../utils/getPaymentIcon";
-import { getPaymentMethodLabel } from "../../../../utils/paymentMethodLable";
+import { getPaymentIcon, getPaymentLabel } from "../../../../utils/getPaymentIcon";
 
 const PaymentSummaryCard = ({ shiftData }) => {
   return (
@@ -16,7 +15,7 @@ const PaymentSummaryCard = ({ shiftData }) => {
               </div>
               <div className="flex-1">
                 <div className="flex justify-between">
-                  <span className="font-medium">{payment.type}</span>
+                  <span className="font-medium">{getPaymentLabel(payment.type)}</span>
                   <span className="font-bold">
                     ${payment.totalAmount?.toFixed(2)}
                   </span>

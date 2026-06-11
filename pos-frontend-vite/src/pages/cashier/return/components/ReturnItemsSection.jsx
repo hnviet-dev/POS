@@ -24,6 +24,7 @@ import { useSelector } from "react-redux";
 import { createRefund } from "../../../../Redux Toolkit/features/refund/refundThunks";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
+import { getPaymentLabel } from "@/utils/getPaymentIcon";
 
 const returnReasons = [
   "Damaged product",
@@ -121,7 +122,7 @@ const ReturnItemsSection = ({ selectedOrder, setShowReceiptDialog }) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="original">
-                    Original Payment Method ({selectedOrder.paymentMode})
+                    Hoàn theo phương thức gốc ({getPaymentLabel(selectedOrder.paymentType)})
                   </SelectItem>
                   <SelectItem value="cash">Cash</SelectItem>
                   {selectedOrder.paymentMode !== "card" && (

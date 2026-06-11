@@ -60,6 +60,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { fmtVND as formatCurrency } from "@/utils/formatCurrency";
 import ChartExportMenu from "@/components/charts/ChartExportMenu";
+import { getPaymentLabel } from "@/utils/getPaymentIcon";
 
 export default function Sales() {
   const dispatch = useDispatch();
@@ -112,7 +113,7 @@ export default function Sales() {
 
   const paymentMethodData =
     salesByPaymentMethod?.map((item) => ({
-      name: item.paymentMethod,
+      name: getPaymentLabel(item.paymentMethod),
       value: item.totalAmount,
     })) || [];
 

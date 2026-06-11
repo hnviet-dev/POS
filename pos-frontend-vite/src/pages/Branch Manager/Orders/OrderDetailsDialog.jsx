@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
+import { PaymentBadge } from "@/utils/getPaymentIcon";
 import OrderItemTable from "../../common/Order/OrderItemTable";
 
 const OrderDetailsDialog = ({
@@ -46,10 +46,7 @@ const OrderDetailsDialog = ({
                 </div>
                 <div>
                   <strong>Payment:</strong>{" "}
-                  <span className="inline-flex items-center gap-1">
-                    {getPaymentIcon(selectedOrder.paymentType)}{" "}
-                    {selectedOrder.paymentType || "-"}
-                  </span>
+                  <PaymentBadge type={selectedOrder.paymentType} />
                 </div>
                 <div>
                   <strong>Amount:</strong>{" "}
